@@ -48,6 +48,7 @@ Route::apiResource('packages', App\Http\Controllers\api\PackageController::class
 Route::apiResource('promotions', App\Http\Controllers\api\PromotionController::class);
 Route::apiResource('subjects', App\Http\Controllers\api\SubjectController::class);
 Route::apiResource('contacts', App\Http\Controllers\api\ContactController::class);
+Route::apiResource('services', App\Http\Controllers\api\ServiceController::class);
 
        // rating //
        
