@@ -25,6 +25,12 @@ Route::post('adminlogin',[App\Http\Controllers\api\AdminAuthController::class,'a
 
 
 
+
+
+
+
+
+
   // user //
 
 Route::post('register',[App\Http\Controllers\api\AuthController::class,'register']);
