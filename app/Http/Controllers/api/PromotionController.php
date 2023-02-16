@@ -23,7 +23,7 @@ class PromotionController extends Controller
             'success' => true,
             'message' => 'All Data susccessfull',
             'data' => $Promotion,
-        ]);
+        ],200);
     }
 
     public function store(Request $request)
@@ -58,7 +58,7 @@ class PromotionController extends Controller
             'success' => true,
             'message' => 'Add Promotion created successfully',
             'data' => $Promotion,
-        ]);
+        ],200);
     }
 
     public function show($id)
@@ -72,8 +72,9 @@ class PromotionController extends Controller
         }
         return response()->json([
             'success' => true,
+            'message' => 'All Data susccessfull',
             'data' => $Promotion,
-        ]);
+        ],200);
     }
 
     public function update(Request $request, $id)
@@ -95,7 +96,7 @@ class PromotionController extends Controller
             'success' => true,
             'message' => 'Promotion updated successfully.',
             'data' => $Promotion,
-        ]);
+        ],200);
     }
 
     public function destroy($id)

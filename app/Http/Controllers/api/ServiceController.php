@@ -43,6 +43,7 @@ class ServiceController extends Controller
         $Service = new Service();
         $Service->name = $req->name;
         $Service->description = $req->description;
+        $Service->type = $req->type;
         if ($image = $req->file('image')) {
             $destinationPath = 'Service/';
             $profileImage = date('YmdHis') . "." . $image->getClientOriginalExtension();
@@ -92,6 +93,7 @@ class ServiceController extends Controller
         $Service = Service::find($id);
         $Service->name = $request->name;
         $Service->description = $request->description;
+        $Service->type = $request->type;
         if ($image = $request->file('image')) {
             $destinationPath = 'Service/';
             $profileImage = date('YmdHis') . "." . $image->getClientOriginalExtension();
