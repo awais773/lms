@@ -48,9 +48,13 @@ Route::apiResource('promotions', App\Http\Controllers\api\PromotionController::c
 Route::apiResource('subjects', App\Http\Controllers\api\SubjectController::class);
 Route::apiResource('contacts', App\Http\Controllers\api\ContactController::class);
 Route::apiResource('services', App\Http\Controllers\api\ServiceController::class);
+Route::apiResource('ads', App\Http\Controllers\api\AdsController::class);
+Route::apiResource('roles', App\Http\Controllers\api\RoleController::class);
+Route::apiResource('userAdd', App\Http\Controllers\api\UserAddController::class);
+
 
        // rating //
-       
+
 Route::post('/ratings/{user}',[App\Http\Controllers\api\RatingController::class,'store']);
 Route::get('/rating/{user}',[App\Http\Controllers\api\RatingController::class,'getRating']);
 

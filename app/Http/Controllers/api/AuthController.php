@@ -85,9 +85,8 @@ class AuthController extends Controller
 
     public function logout()
     {
-
-        auth()->guard('api')->logout();
-
+        // auth()->guard('api')->logout();
+        auth()->user()->token()->revoke();
         return response()->json([
             'Success' => true,
             'message' => 'User successfully signed out'
