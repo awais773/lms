@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\api;
 
+use App\Models\User;
 use App\Models\AdminUser;
 use Illuminate\Http\Request;
 use App\Mail\OtpVerificationMail;
@@ -9,8 +10,10 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 use Laravel\Passport\Guards\TokenGuard;
+use Illuminate\Support\Facades\Validator;
 
 class AdminAuthController extends Controller
 {
@@ -191,4 +194,28 @@ class AdminAuthController extends Controller
     //     }
     //     return response()->json(['success' => false, 'message' => 'Failed! something went wrong',]);
     // }
+
+      public function dashboard(){
+         $user = User::where('role_id','1')->count();
+         $teacher = User::where('role_id','2')->count();
+         
+         $currentMonth = Carbon::now()->month;
+        $totalEarnings = DB::table('users')
+        ->whereMonth('created_at', '=', $currentMonth)
+         ->sum('receiving');
+         if (is_null($user & $teacher) ) {
+            return response()->json([
+                'success' => false,
+                'message' => 'data not found',
+            ]);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => 'All Data susccessfull',
+            'student' => $user,
+            'teacher' => $teacher,
+            'totalEarnings' => $totalEarnings,
+        ],200);
+    }
+      
 }

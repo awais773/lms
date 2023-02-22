@@ -22,6 +22,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::post('adminRegister',[App\Http\Controllers\api\AdminAuthController::class,'adminRegister']);
 Route::post('adminlogin',[App\Http\Controllers\api\AdminAuthController::class,'adminlogin']);
+Route::get('dashboard',[App\Http\Controllers\api\AdminAuthController::class,'dashboard']);
 
 
   // user //
@@ -40,6 +41,9 @@ Route::post('/update/AdminProfile', [App\Http\Controllers\api\AdminAuthControlle
 Route::post('/otp/verify', [App\Http\Controllers\api\AuthController::class, 'otpVerification']);
 Route::get('get-user',[App\Http\Controllers\api\AuthController::class,'userInfo']);
 Route::get('/logout',[App\Http\Controllers\api\AuthController::class,'logout']);
+Route::get('/instructor',[App\Http\Controllers\api\AuthController::class,'instructor']);
+Route::get('/student',[App\Http\Controllers\api\AuthController::class,'student']);
+Route::get('/status/{id}',[App\Http\Controllers\api\AuthController::class,'status']);
 
 
 Route::apiResource('coures', App\Http\Controllers\api\CourceController::class);

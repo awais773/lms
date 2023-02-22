@@ -203,4 +203,57 @@ class AuthController extends Controller
         }
         return response()->json(['success' => false, 'message' => 'Failed! something went wrong',]);
     }
-}
+
+    public function instructor()
+    {
+        $data = User::with('role')->where('type','1')->get();
+        if (is_null($data)) {
+            return response()->json('data not found',);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => 'All Data susccessfull',
+            'data' => $data,
+        ]);
+    }
+
+    public function student()
+    {
+        $data = User::with('role')->where('type','2')->get();
+        if (is_null($data)) {
+            return response()->json('data not found',);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => 'All Data susccessfull',
+            'data' => $data,
+        ]);
+    }
+
+
+         public function status($id)
+          {
+                $User = User::find($id);
+                if ($User->active) {
+                    $User->active = false;
+                } else {
+                    $User->active = true;
+                }
+                if (!empty($User)) {
+                    $User->update();
+                    return response()->json([
+                        'success'=>true,
+                        'message'=>'  Status Changed successfuly',
+                    ],200);
+                }
+                else {
+                    return response()->json([
+                        'success'=>false,
+                        'message'=>'something wrong try again ',
+                    ]);
+                }  
+            }
+       
+    }
+
+

@@ -107,20 +107,4 @@ class UserAddController extends Controller
         }
     }
 
-
-    public function allLogs(Request $request)
-    {
-        $serchData = $request->module;
-
-        $data = User::latest()->with('user', 'client', 'status', 'resume', 'currency', 'role', 'position', 'city', 'state', 'assignPosition')->where('module', 'LIKE', "%{$serchData}%")->get();
-        if (is_null($data)) {
-            return response()->json('data not found',);
-        }
-        return response()->json([
-            'success' => 'True',
-            'message' => 'All Data susccessfull',
-            'data' => $data,
-
-        ]);
-    }
 }
