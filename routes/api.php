@@ -31,6 +31,8 @@ Route::post('register',[App\Http\Controllers\api\AuthController::class,'register
 Route::post('login',[App\Http\Controllers\api\AuthController::class,'login']);
 Route::post('/forgotPassword', [App\Http\Controllers\api\AuthController::class, 'forgotPassword']);
 Route::post('/updatePassword', [App\Http\Controllers\api\AuthController::class, 'updatePassword']);
+Route::get('/fileGet', [App\Http\Controllers\api\SubjectController::class, 'fileGet']);
+Route::post('/addFile', [App\Http\Controllers\api\SubjectController::class, 'addFile']);
 
 
 
