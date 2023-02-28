@@ -57,6 +57,7 @@ Route::apiResource('services', App\Http\Controllers\api\ServiceController::class
 Route::apiResource('ads', App\Http\Controllers\api\AdsController::class);
 Route::apiResource('roles', App\Http\Controllers\api\RoleController::class);
 Route::apiResource('userAdd', App\Http\Controllers\api\UserAddController::class);
+Route::apiResource('categories', App\Http\Controllers\api\CategoryController::class);
 
 
        // rating //

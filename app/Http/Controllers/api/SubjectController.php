@@ -11,7 +11,7 @@ class SubjectController extends Controller
 
     public function index()
     {
-        $Subject = Subject::latest()->get();
+        $Subject = Subject::latest()->with('category')->get();
         if (is_null($Subject)) {
             return response()->json([
                 'success' => false,
@@ -42,6 +42,7 @@ class SubjectController extends Controller
         $Subject = new Subject();
         $Subject->name = $req->name;
         $Subject->description = $req->description;
+        $Subject->category_id = $req->category_id;
         if ($image = $req->file('image')) {
             $destinationPath = 'Subject/';
             $profileImage = date('YmdHis') . "." . $image->getClientOriginalExtension();
@@ -65,7 +66,7 @@ class SubjectController extends Controller
 
     public function show($id)
     {
-        $Package = Subject::where('id', $id)->first();
+        $Package = Subject::with('category')->where('id', $id)->first();
         if (is_null($Package)) {
             return response()->json([
                 'success' => false,
@@ -90,6 +91,7 @@ class SubjectController extends Controller
         $Subject = Subject::find($id);
         $Subject->name = $request->name;
         $Subject->description = $request->description;
+        $Subject->category_id = $request->category_id;
         if ($image = $request->file('image')) {
             $destinationPath = 'Subject/';
             $profileImage = date('YmdHis') . "." . $image->getClientOriginalExtension();
