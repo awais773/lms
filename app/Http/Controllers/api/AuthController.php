@@ -39,6 +39,7 @@ class AuthController extends Controller
             'email' => $request->email,
             'country' => $request->country,
             'mobile_number' => $request->mobile_number,
+            'type' => $request->type,
             'password' => Hash::make($request->password)
         ]);
         $token = $user->createToken('Token')->accessToken;
@@ -173,6 +174,9 @@ class AuthController extends Controller
             }
             if (!empty($request->input('information'))) {
                 $obj->information = $request->input('information');
+            }
+            if (!empty($request->input('type'))) {
+                $obj->type = $request->input('type');
             }
             if ($obj->save()) {
                 $this->data = $obj;
