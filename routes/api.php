@@ -46,6 +46,7 @@ Route::get('/logout',[App\Http\Controllers\api\AuthController::class,'logout']);
 Route::get('/instructor',[App\Http\Controllers\api\AuthController::class,'instructor']);
 Route::get('/student',[App\Http\Controllers\api\AuthController::class,'student']);
 Route::get('/status/{id}',[App\Http\Controllers\api\AuthController::class,'status']);
+Route::delete('/delete/{id}',[App\Http\Controllers\api\AuthController::class,'delete']);
 
 
 Route::apiResource('coures', App\Http\Controllers\api\CourceController::class);

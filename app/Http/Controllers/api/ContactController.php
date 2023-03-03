@@ -23,7 +23,7 @@ class ContactController extends Controller
             'success' => true,
             'message' => 'All Data susccessfull',
             'data' => $Contact,
-        ]);
+        ],200);
     }
 
 
@@ -83,7 +83,7 @@ class ContactController extends Controller
             'success' => true,
             'message' => 'Add Package created successfully',
             'data' => $Contact,
-        ]);
+        ],200);
     }
   
     public function destroy($id)
