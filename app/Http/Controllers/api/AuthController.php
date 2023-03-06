@@ -266,6 +266,7 @@ class AuthController extends Controller
                     return response()->json([
                         'success'=>true,
                         'message'=>'  Status Changed successfuly',
+                        'data' => $User,
                     ],200);
                 }
                 else {
