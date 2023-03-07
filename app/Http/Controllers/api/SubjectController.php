@@ -22,7 +22,7 @@ class SubjectController extends Controller
             'success' => true,
             'message' => 'All Data susccessfull',
             'data' => $Subject,
-        ]);
+        ],200);
     }
 
     public function store(Request $req)
@@ -61,7 +61,7 @@ class SubjectController extends Controller
             'success' => true,
             'message' => 'Add Subject created successfully',
             'data' => $Subject,
-        ]);
+        ],200);
     }
 
     public function show($id)
@@ -76,7 +76,7 @@ class SubjectController extends Controller
         return response()->json([
             'success' => true,
             'data' => $Package,
-        ]);
+        ],200);
     } 
 
     public function update(Request $request, $id)
@@ -104,7 +104,7 @@ class SubjectController extends Controller
             'success' => true,
             'message' => 'Subject updated successfully.',
             'data' => $Subject,
-        ]);
+        ],200);
     }
 
     public function destroy($id)
