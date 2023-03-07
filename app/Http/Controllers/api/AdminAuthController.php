@@ -7,6 +7,7 @@ use App\Models\AdminUser;
 use Illuminate\Http\Request;
 use App\Mail\OtpVerificationMail;
 use App\Http\Controllers\Controller;
+use App\Models\Blog;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -217,6 +218,84 @@ class AdminAuthController extends Controller
             'totalEarnings' => $totalEarnings,
         ],200);
     }
+
+
+    public function addBlog(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+        ]);
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                // 'message' => $validator->errors()->toJson()
+                'message' => 'title already exist',
+
+            ], 400);
+        }
+        if ($file = $req->file('image')) {
+                $image_name = md5(rand(1000, 10000));
+                $ext = strtolower($file->getClientOriginalExtension());
+                $image_full_name = $image_name . '.' . $ext;
+                $upload_path = 'blog/';
+                $image_url = $upload_path . $image_full_name;
+                $file->move($upload_path, $upload_path . $image_full_name);
+                $image = $image_url;
+
+                $blog = new Blog();
+                $blog->image = $image;
+                $blog->title = $req->title;
+                $blog->description = $req->description;
+                 $blog->save();
+            }
+        if (is_null($blog)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'storage error'
+            ],);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => 'Add blog created successfully',
+            'data' => $blog,
+        ],200);
+    }
+      
+
+    public function blogGet()
+    {
+        $Blog = Blog::latest()->get();
+        if (is_null($Blog)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'data not found',
+            ]);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => 'All Data susccessfull',
+            'data' => $Blog,
+        ],200);
+    }
+
+
+    public function blogDestroy($id)
+    {
+        $Blog = Blog::find($id);
+        if (!empty($Blog)) {
+            $Blog->delete();
+            return response()->json([
+                'success' => true,
+                'message' => ' delete successfuly',
+            ], 200);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'something wrong try again ',
+            ]);
+        }
+    }
+
+
       
 }
 

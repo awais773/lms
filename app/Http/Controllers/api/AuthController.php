@@ -179,6 +179,15 @@ class AuthController extends Controller
             if (!empty($request->input('type'))) {
                 $obj->type = $request->input('type');
             }
+            if (!empty($request->input('age'))) {
+                $obj->age = $request->input('age');
+            } 
+            if (!empty($request->input('skills'))) {
+                $obj->skills = $request->input('skills');
+            }
+            if (!empty($request->input('nationality'))) {
+                $obj->nationality = $request->input('nationality');
+            }
             if ($obj->save()) {
                 $this->data = $obj;
                 $this->success = true;

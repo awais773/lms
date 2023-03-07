@@ -128,8 +128,6 @@ class SubjectController extends Controller
     public function addFile(Request $req)
     {
         $validator = Validator::make($req->all(), [
-            // 'title' => 'required|unique:dealer_add_societies',
-            // 'title' => 'required|unique:dealer_add_societies,title,NULL,id,user_id,' . auth()->id(),
         ]);
         if ($validator->fails()) {
             return response()->json([

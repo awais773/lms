@@ -47,6 +47,11 @@ Route::get('/instructor',[App\Http\Controllers\api\AuthController::class,'instru
 Route::get('/student',[App\Http\Controllers\api\AuthController::class,'student']);
 Route::get('/status/{id}',[App\Http\Controllers\api\AuthController::class,'status']);
 Route::delete('/delete/{id}',[App\Http\Controllers\api\AuthController::class,'delete']);
+ 
+        //
+Route::post('addBlog',[App\Http\Controllers\api\AdminAuthController::class,'addBlog']);
+Route::get('blogGet',[App\Http\Controllers\api\AdminAuthController::class,'blogGet']);
+Route::delete('blogDestroy/{id}',[App\Http\Controllers\api\AdminAuthController::class,'blogDestroy']);
 
 
 Route::apiResource('coures', App\Http\Controllers\api\CourceController::class);

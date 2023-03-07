@@ -28,6 +28,9 @@ class User extends Authenticatable
         'type',
         'information',
         'image',
+        'nationality',
+        'age',
+        'skills',
 
     ];
 
