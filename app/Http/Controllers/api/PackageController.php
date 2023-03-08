@@ -12,7 +12,7 @@ class PackageController extends Controller
 
     public function index()
     {
-        $Package = Package::latest()->with('user')->get();
+        $Package = Package::latest()->get();
         if (is_null($Package)) {
             return response()->json([
                 'success' => false,
@@ -61,7 +61,7 @@ class PackageController extends Controller
 
     public function show($id)
     {
-        $Package = Package::with('user')->where('id', $id)->first();
+        $Package = Package::where('id', $id)->first();
         if (is_null($Package)) {
             return response()->json([
                 'success' => false,
