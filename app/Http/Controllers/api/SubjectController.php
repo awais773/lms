@@ -2,6 +2,7 @@
 namespace App\Http\Controllers\api;
 use App\Models\Subject;
 use Illuminate\Http\Request;
+use App\Helpers\FilterFunctions;
 use App\Http\Controllers\Controller;
 use App\Models\File;
 use Illuminate\Support\Facades\Validator;
@@ -9,10 +10,22 @@ use Illuminate\Support\Facades\Validator;
 class SubjectController extends Controller
 {
 
-    public function index()
+    public function index(Request $request)
     {
-        $Subject = Subject::latest()->with('category')->get();
-        if (is_null($Subject)) {
+        $query = Subject::with('category');
+        // $filters = $request->input('filters', []);
+        // $sort = $request->input('sort', []);
+        // $start = max(0, intval($request->input('start' ))); // ensure $start is an integer >= 0
+        // $length = max(0, intval($request->input('length' ))); // ensure $length is an integer >= 0
+        // $query = FilterFunctions::apply($query, $filters, $sort ,$start, $length);
+
+        // if ($length > 0) { // add this check to ensure $length is greater than 0
+        //     $query->offset($start)->limit($length);
+        // }
+        
+        $results = $query->get();
+
+        if (is_null($results)) {
             return response()->json([
                 'success' => false,
                 'message' => 'data not found',
@@ -21,7 +34,7 @@ class SubjectController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'All Data susccessfull',
-            'data' => $Subject,
+            'data' => $results,
         ],200);
     }
 

@@ -53,6 +53,11 @@ Route::post('addBlog',[App\Http\Controllers\api\AdminAuthController::class,'addB
 Route::get('blogGet',[App\Http\Controllers\api\AdminAuthController::class,'blogGet']);
 Route::delete('blogDestroy/{id}',[App\Http\Controllers\api\AdminAuthController::class,'blogDestroy']);
 
+       //     
+Route::delete('reviewDestroy/{id}',[App\Http\Controllers\api\AdminAuthController::class,'reviewDestroy']);
+Route::post('reviewAdd',[App\Http\Controllers\api\AdminAuthController::class,'reviewAdd']);
+Route::get('ReviewGet',[App\Http\Controllers\api\AdminAuthController::class,'ReviewGet']);
+
 
 Route::apiResource('coures', App\Http\Controllers\api\CourceController::class);
 Route::apiResource('packages', App\Http\Controllers\api\PackageController::class);

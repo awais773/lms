@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Mail\OtpVerificationMail;
 use App\Http\Controllers\Controller;
 use App\Models\Blog;
+use App\Models\Review;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -296,6 +297,60 @@ class AdminAuthController extends Controller
     }
 
 
+    public function reviewAdd(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            // 'name' => 'required|string|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors());
+        }
+        $user = Auth::guard('api')->user();
+        $reviewAdd = new Review();
+        $reviewAdd->review = $request->review;
+        $reviewAdd->teacher_id = $request->teacher_id;
+        $reviewAdd->student_id =$user->id;
+        $reviewAdd->save();
+        return response()->json([
+            'success' => true,
+            'message' => 'reviewAdd updated successfully.',
+            'data' => $reviewAdd,
+        ],200);
+    }
+
+    public function reviewDestroy($id)
+    {
+        $Review = Review::find($id);
+        if (!empty($Review)) {
+            $Review->delete();
+            return response()->json([
+                'success' => true,
+                'message' => 'delete successfuly',
+            ], 200);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'something wrong try again',
+            ]);
+        }
+    }
+
+    public function ReviewGet()
+    {
+        $Review = Review::with('teacher:id,name','student:id,name')->get();
+        if (is_null($Review)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'data not found',
+            ]);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => 'All Data susccessfull',
+            'data' => $Review,
+        ],200);
+    }
       
 }
 

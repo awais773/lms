@@ -41,40 +41,11 @@ class PackageController extends Controller
             ], 400);
         }
         $Package = new Package();
-        $Package->charges_pay = $req->charges_pay;
-        // $Package->review = $req->review;
-        $Package->user_id = $req->user_id;
-        $Package->demo = $req->demo;
-        $Package->discount = $req->discount;
-        $Package->online = $req->online;
-        $Package->offline = $req->offline;
+        $Package->package_name = $req->package_name;
+        $Package->monthly_price = $req->monthly_price;
+        $Package->description = $req->description;
+        $Package->details = $req->details;
         $Package->save();
-
-        if ($files = $req->file('image')) {
-            foreach ($files as $file) {
-                $image_name = md5(rand(1000, 10000));
-                $ext = strtolower($file->getClientOriginalExtension());
-                $image_full_name = $image_name . '.' . $ext;
-                $upload_path = 'packagePicture/';
-                $image_url = $upload_path . $image_full_name;
-                $file->move($upload_path, $upload_path . $image_full_name);
-                $image = $image_url;
-
-                // $productImage = new SocietyPicture();
-                // $productImage->image = $image;
-                // $productImage->dealer_add_society_id = $Cource->id;
-                // $productImage->save();
-            }
-
-            //    $fltnos  = $req->input('add_society_id');
-            //     foreach($fltnos as $key => $fltno) {
-            //         $modelName = new PlotSize();
-            //         $modelName->add_society_id = $fltno;
-            //         $modelName->dealer_add_socity_id = $rating->id;
-            //         $modelName->save();
-            //     }
-
-        }
         if (is_null($Package)) {
             return response()->json([
                 'success' => false,
@@ -103,9 +74,9 @@ class PackageController extends Controller
         ]);
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $req, $id)
     {
-        $validator = Validator::make($request->all(), [
+        $validator = Validator::make($req->all(), [
             // 'name' => 'required|string|max:255',
         ]);
 
@@ -113,13 +84,10 @@ class PackageController extends Controller
             return response()->json($validator->errors());
         }
         $Package = Package::find($id);
-        $Package->charges_pay = $request->charges_pay;
-        $Package->demo = $request->demo;
-        $Package->discount = $request->discount;
-        $Package->online = $request->online;
-        $Package->offline = $request->offline;
-        $Package->user_id = $request->user_id;
-        // $Package->review = $request->review;
+        $Package->package_name = $req->package_name;
+        $Package->monthly_price = $req->monthly_price;
+        $Package->description = $req->description;
+        $Package->details = $req->details;
         $Package->update();
         return response()->json([
             'success' => true,
