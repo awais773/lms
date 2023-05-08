@@ -43,6 +43,8 @@ class AuthController extends Controller
             'type' => $request->type,
             'password' => Hash::make($request->password)
         ]);
+        $email = 'http://127.0.0.1:8000/Devincare/test';
+        Mail::to($request->input('email'))->send(new OtpVerificationMail($email));
         $token = $user->createToken('Token')->accessToken;
         if (!$user) {
             return response()->json(['success' => false, 'message' => 'somthing Wrong',], 422);
@@ -143,9 +145,8 @@ class AuthController extends Controller
     }
 
 
-    public function updateProfile(Request $request)
+    public function updateProfile(Request $request, $id)
     {
-        $id = $request->user()->id;
         $obj = User::find($id);
         if ($obj) {
             if ($image = $request->file('image')) {
@@ -155,8 +156,22 @@ class AuthController extends Controller
                 $input['image'] = "$profileImage";
                 $obj->image = $profileImage;
             }
+
+            if ($image = $request->file('cover_image')) {
+                $destinationPath = 'coverImage/';
+                $profileImage = date('YmdHis') . "." . $image->getClientOriginalExtension();
+                $image->move($destinationPath, $profileImage);
+                $input['image'] = "$profileImage";
+                $obj->cover_image = $profileImage;
+            }
             if (!empty($request->input('name'))) {
                 $obj->name = $request->input('name');
+            }
+            if (!empty($request->input('price'))) {
+                $obj->price = $request->input('price');
+            }
+            if (!empty($request->input('expert'))) {
+                $obj->expert = $request->input('expert');
             }
             if (!empty($request->input('email'))) {
                 $obj->email = $request->input('email');
@@ -185,9 +200,19 @@ class AuthController extends Controller
             if (!empty($request->input('skills'))) {
                 $obj->skills = $request->input('skills');
             }
+            if (!empty($request->input('link'))) {
+                $obj->link = $request->input('link');
+            }
             if (!empty($request->input('nationality'))) {
                 $obj->nationality = $request->input('nationality');
             }
+            if (!empty($request->input('service'))) {
+                $obj->service = $request->input('service');
+            }
+            if (!empty($request->input('address'))) {
+                $obj->address = $request->input('address');
+            }
+
             if ($obj->save()) {
                 $this->data = $obj;
                 $this->success = true;
@@ -285,6 +310,40 @@ class AuthController extends Controller
                     ]);
                 }  
             }
+
+            public function getTeacher()
+            {
+                $user = Auth::with('role')->guard('api')->user();
+                $users = User::whereIn('id', $user)->get();
+                if (is_null($users)) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'data not found'
+                    ],);
+                }
+                return response()->json([
+                    'success' => true,
+                    'message' => 'All Data susccessfull',
+                    'data' => $users,
+                ]);
+            }
+
+
+            public function getOneTeacher($id)
+            {
+                $User = User::where('id', $id)->first();
+                if (is_null($User)) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'data not found'
+                    ], 404);
+                }
+                return response()->json([
+                    'success' => true,
+                    'message' => 'All Data susccessfull',
+                    'data' => $User,
+                ]);
+            } 
        
     }
 

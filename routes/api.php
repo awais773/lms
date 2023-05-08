@@ -33,12 +33,16 @@ Route::post('/forgotPassword', [App\Http\Controllers\api\AuthController::class, 
 Route::post('/updatePassword', [App\Http\Controllers\api\AuthController::class, 'updatePassword']);
 Route::get('/fileGet', [App\Http\Controllers\api\SubjectController::class, 'fileGet']);
 Route::post('/addFile', [App\Http\Controllers\api\SubjectController::class, 'addFile']);
+Route::put('/update/profile/{id}', [App\Http\Controllers\api\AuthController::class, 'updateProfile']);
+Route::get('/getOneTeacher/{id}',[App\Http\Controllers\api\AuthController::class,'getOneTeacher']);
+
+
+Route::apiResource('subjects', App\Http\Controllers\api\SubjectController::class);
 
 
 
 
 Route::middleware('auth:api')->group(function () {
-Route::post('/update/profile', [App\Http\Controllers\api\AuthController::class, 'updateProfile']);
 Route::post('/update/AdminProfile', [App\Http\Controllers\api\AdminAuthController::class, 'adminProfile']);
 Route::post('/otp/verify', [App\Http\Controllers\api\AuthController::class, 'otpVerification']);
 Route::get('get-user',[App\Http\Controllers\api\AuthController::class,'userInfo']);
@@ -47,6 +51,8 @@ Route::get('/instructor',[App\Http\Controllers\api\AuthController::class,'instru
 Route::get('/student',[App\Http\Controllers\api\AuthController::class,'student']);
 Route::get('/status/{id}',[App\Http\Controllers\api\AuthController::class,'status']);
 Route::delete('/delete/{id}',[App\Http\Controllers\api\AuthController::class,'delete']);
+Route::get('/getTeacher',[App\Http\Controllers\api\AuthController::class,'getTeacher']);
+
  
         //
 Route::post('addBlog',[App\Http\Controllers\api\AdminAuthController::class,'addBlog']);

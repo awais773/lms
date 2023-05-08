@@ -287,7 +287,7 @@ class AdminAuthController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => ' delete successfuly',
-            ], 200);
+            ],200);
         } else {
             return response()->json([
                 'success' => false,
@@ -327,7 +327,7 @@ class AdminAuthController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'delete successfuly',
-            ], 200);
+            ],200);
         } else {
             return response()->json([
                 'success' => false,

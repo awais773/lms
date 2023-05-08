@@ -24,6 +24,15 @@ class Cource extends Model
     }
 
 
+    public function Class() {
+        return $this->hasOne(Category::class, 'id', 'class_id');  
+    }
+
+    public function subject() {
+        return $this->hasOne(Subject::class, 'id', 'subject_id');  
+    }
+
+
 }
 
 

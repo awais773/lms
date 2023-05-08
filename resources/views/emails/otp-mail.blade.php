@@ -119,7 +119,7 @@
 
         .main-title {
 
-            font-weight: 600;
+            font-weight: 10;
             font-size: 25px;
             margin-bottom: 10px;
             color: #5E5CFA;
@@ -240,14 +240,14 @@
             }
         }
     </style>
-    <title>OTP Verification</title>
+    <title>Lms Notification</title>
 </head>
 
 <body>
 <div class="card">
     <header class="card-header">
         <div class="col">
-            <h2 class="main-title">OTP: {{$data}}</h2>
+            <h1 class="main-title">Notification: {{$data}}</h1>
         </div>
     </header>
 </div>

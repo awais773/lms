@@ -11,13 +11,6 @@ class Review extends Model
 
     protected $guarded = [] ;
 
-    // protected $fillable = [
-
-    //     'name',
-    //     'user_id',
-    //     'details',
-    // ] ;
-
 
     public function student() {
         return $this->hasOne(User::class, 'id', 'student_id');  

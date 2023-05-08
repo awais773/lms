@@ -15,7 +15,7 @@ class CourceController extends Controller
      */
     public function index()
     {
-        $Cource = Cource::latest()->with('user')->get();
+        $Cource = Cource::latest()->with('class:id,name','subject:id,name')->get();
         if (is_null($Cource)) {
             return response()->json([
                 'success' => false,
@@ -33,66 +33,64 @@ class CourceController extends Controller
     public function store(Request $req)
     {
         $validator = Validator::make($req->all(), [
-            // 'title' => 'required|unique:dealer_add_societies',
-            // 'title' => 'required|unique:dealer_add_societies,title,NULL,id,user_id,' . auth()->id(),
+            // 'thumbnail' => 'required',
+            // 'video' => 'required',
         ]);
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                // 'message' => $validator->errors()->toJson()
-                'message' => 'title already exist',
-
+                'errors' => $validator->errors()
+    
             ], 400);
         }
-        $Cource = new Cource();
-        $Cource->name = $req->name;
-        $Cource->user_id = $req->user_id;
-        $Cource->details = $req->details;
-        // $Cource->time = $req->time;
-        $Cource->save();
-
-        if ($files = $req->file('image')) {
-            foreach ($files as $file) {
-                $image_name = md5(rand(1000, 10000));
-                $ext = strtolower($file->getClientOriginalExtension());
-                $image_full_name = $image_name . '.' . $ext;
-                $upload_path = 'societyPicture/';
-                $image_url = $upload_path . $image_full_name;
-                $file->move($upload_path, $upload_path . $image_full_name);
-                $image = $image_url;
-                // $productImage = new SocietyPicture();
-                // $productImage->image = $image;
-                // $productImage->dealer_add_society_id = $Cource->id;
-                // $productImage->save();
+        if ($file = $req->file('video')) {
+            $video_name = md5(rand(1000, 10000));
+            $ext = strtolower($file->getClientOriginalExtension());
+            $video_full_name = $video_name . '.' . $ext;
+            $upload_path = 'course/';
+            $video_url = $upload_path . $video_full_name;
+            $file->move($upload_path, $video_url);
+    
+            if ($thumbnail = $req->file('image')) {
+                $thumbnail_name = md5(rand(1000, 10000));
+                $ext = strtolower($thumbnail->getClientOriginalExtension());
+                $thumbnail_full_name = $thumbnail_name . '.' . $ext;
+                $upload_path = 'course/';
+                $thumbnail_url = $upload_path . $thumbnail_full_name;
+                $thumbnail->move($upload_path, $thumbnail_url);
+            } else {
+                $thumbnail_url = null;
             }
-
-            //    $fltnos  = $req->input('add_society_id');
-            //     foreach($fltnos as $key => $fltno) {
-            //         $modelName = new PlotSize();
-            //         $modelName->add_society_id = $fltno;
-            //         $modelName->dealer_add_socity_id = $rating->id;
-            //         $modelName->save();
-            //     }
-
-        }
-        if (is_null($Cource)) {
+            $Cource = new Cource();
+            $Cource->name = $req->name;
+            $Cource->image = $thumbnail_url;
+            $Cource->video = $video_url;
+            $Cource->user_id = $req->user_id;
+            $Cource->details = $req->details;
+            $Cource->expertise = $req->expertise;
+            $Cource->class_id = $req->class_id;
+            $Cource->subject_id = $req->subject_id;
+            $Cource->location = $req->location;
+            
+            $Cource->save();
+    
+            return response()->json([
+                'success' => true,
+                'message' => 'Add Cource created successfully',
+                'data' => $Cource,
+            ], 200);
+        } else {
             return response()->json([
                 'success' => false,
-                'message' => 'storage error'
-            ],);
+                'message' => 'Cource upload failed'
+            ], 400);
         }
-        return response()->json([
-            'success' => true,
-            'message' => 'Add Society created successfully',
-            'data' => $Cource,
-        ]);
     }
-
 
    
     public function show($id)
     {
-        $Cource = Cource::with('user')->where('id',$id)->first();
+        $Cource = Cource::with('class:id,name','subject:id,name')->where('id',$id)->first();
         if (is_null($Cource)) {
             return response()->json([
                 'success' => false,
@@ -106,27 +104,53 @@ class CourceController extends Controller
     }
 
 
-   
-    public function update(Request $request, $id)
-    {
-        $validator = Validator::make($request->all(), [
-            // 'name' => 'required|string|max:255',
-        ]);
 
-        if ($validator->fails()) {
-            return response()->json($validator->errors());
+    public function update(Request $req, $id)
+    {
+        $video = Cource::find($id);
+        if (is_null($video)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'course not found',
+            ], 404);
         }
-        $Cource = Cource::find($id);
-        $Cource->name = $request->name;
-        $Cource->details = $request->details;
-        $Cource->user_id = $request->user_id;
-        $Cource->update();
+        $validator = Validator::make($req->all(), []);
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors()->toJson(),
+            ], 400);
+        }
+        if ($file = $req->file('video')) {
+            $video_name = md5(rand(1000, 10000));
+            $ext = strtolower($file->getClientOriginalExtension());
+            $video_full_name = $video_name . '.' . $ext;
+            $upload_path = 'course/';
+            $video_url = $upload_path . $video_full_name;
+            $file->move($upload_path, $video_url);
+            $video->video = $video_url;
+        }
+        if ($file = $req->file('image')) {
+            $thumbnail_name = md5(rand(1000, 10000));
+            $ext = strtolower($file->getClientOriginalExtension());
+            $thumbnail_full_name = $thumbnail_name . '.' . $ext;
+            $upload_path = 'course/';
+            $thumbnail_url = $upload_path . $thumbnail_full_name;
+            $file->move($upload_path, $thumbnail_url);
+            $video->image = $thumbnail_url;
+        }
+        $video->name = $req->name;
+        $video->details = $req->details;
+        $video->expertise = $req->expertise;
+        $video->class_id = $req->class_id;
+        $video->subject_id = $req->subject_id;
+        $video->location = $req->location;
+        $video->save();
         return response()->json([
             'success' => true,
-            'message' => 'Cource updated successfully.',
-            'data' => $Cource,
-
-        ]);
+            'message' => 'course updated successfully',
+            'data' => $video,
+        ], 200);
     }
 
    
