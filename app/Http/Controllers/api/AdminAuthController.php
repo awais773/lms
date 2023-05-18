@@ -9,6 +9,7 @@ use App\Mail\OtpVerificationMail;
 use App\Http\Controllers\Controller;
 use App\Models\Blog;
 use App\Models\Review;
+use App\Models\Testimonial;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -221,46 +222,88 @@ class AdminAuthController extends Controller
     }
 
 
+
     public function addBlog(Request $req)
     {
+        $video = new Blog();
         $validator = Validator::make($req->all(), [
         ]);
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                // 'message' => $validator->errors()->toJson()
-                'message' => 'title already exist',
-
+                'message' => $validator->errors()->toJson(),
             ], 400);
         }
         if ($file = $req->file('image')) {
-                $image_name = md5(rand(1000, 10000));
-                $ext = strtolower($file->getClientOriginalExtension());
-                $image_full_name = $image_name . '.' . $ext;
-                $upload_path = 'blog/';
-                $image_url = $upload_path . $image_full_name;
-                $file->move($upload_path, $upload_path . $image_full_name);
-                $image = $image_url;
+            $video_name = md5(rand(1000, 10000));
+            $ext = strtolower($file->getClientOriginalExtension());
+            $video_full_name = $video_name . '.' . $ext;
+            $upload_path = 'blog/';
+            $video_url = $upload_path . $video_full_name;
+            $file->move($upload_path, $video_url);
+            $video->image = $video_url;
+        }
+        $video->title = $req->title;
+        $video->description = $req->description;
+        $video->save();
+        return response()->json([
+            'success' => true,
+            'message' => 'Blog Added successfully',
+            'data' => $video,
+        ], 200);
+    }
 
-                $blog = new Blog();
-                $blog->image = $image;
-                $blog->title = $req->title;
-                $blog->description = $req->description;
-                 $blog->save();
-            }
-        if (is_null($blog)) {
+
+    public function update(Request $req, $id)
+    {
+        $video = Blog::find($id);
+        if (is_null($video)) {
             return response()->json([
                 'success' => false,
-                'message' => 'storage error'
-            ],);
+                'message' => 'course not found',
+            ], 404);
+        }
+        $validator = Validator::make($req->all(), []);
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors()->toJson(),
+            ], 400);
+        }
+        if ($file = $req->file('image')) {
+            $video_name = md5(rand(1000, 10000));
+            $ext = strtolower($file->getClientOriginalExtension());
+            $video_full_name = $video_name . '.' . $ext;
+            $upload_path = 'blog/';
+            $video_url = $upload_path . $video_full_name;
+            $file->move($upload_path, $video_url);
+            $video->image = $video_url;
+        }
+        $video->title = $req->title;
+        $video->description = $req->description;
+        $video->save();
+        return response()->json([
+            'success' => true,
+            'message' => 'blog updated successfully',
+            'data' => $video,
+        ], 200);
+    }
+      
+    public function show($id)
+    {
+        $Cource = Blog::where('id',$id)->first();
+        if (is_null($Cource)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'data not found'
+            ], 404);
         }
         return response()->json([
             'success' => true,
-            'message' => 'Add blog created successfully',
-            'data' => $blog,
-        ],200);
+            'data' => $Cource,
+        ]);
     }
-      
+
 
     public function blogGet()
     {
@@ -350,6 +393,80 @@ class AdminAuthController extends Controller
             'message' => 'All Data susccessfull',
             'data' => $Review,
         ],200);
+    }
+
+
+    public function Addtestimonial(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            // 'name' => 'required|string|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors());
+        }
+        $Testimonial = new Testimonial();
+        $Testimonial->teacher_id = $request->teacher_id;
+        $Testimonial->description = $request->description;
+        $Testimonial->save();
+        return response()->json([
+            'success' => true,
+            'message' => 'Testimonial add successfully.',
+            'data' => $Testimonial,
+        ],200);
+    }
+
+
+    
+    public function TestimonialGet()
+    {
+        $Testimonial = Testimonial::with('teacher')->get();
+        if (is_null($Testimonial)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'data not found',
+            ]);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => 'All Data susccessfull',
+            'data' => $Testimonial,
+        ],200);
+    }
+
+
+    public function TestimonialDestroy($id)
+    {
+        $Testimonial = Testimonial::find($id);
+        if (!empty($Testimonial)) {
+            $Testimonial->delete();
+            return response()->json([
+                'success' => true,
+                'message' => 'delete successfuly',
+            ],200);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'something wrong try again',
+            ]);
+        }
+    }
+
+
+        
+    public function TestimonialShow($id)
+    {
+        $Testimonial = Testimonial::with('teacher')->where('id',$id)->first();
+        if (is_null($Testimonial)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'data not found'
+            ], 404);
+        }
+        return response()->json([
+            'success' => true,
+            'data' => $Testimonial,
+        ]);
     }
       
 }

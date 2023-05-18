@@ -36,6 +36,7 @@ class AuthController extends Controller
 
         $user = User::create([
             'name' => $request->name,
+            'city' => $request->city,
             'email' => $request->email,
             'country' => $request->country,
             'mobile_number' => $request->mobile_number,
@@ -43,7 +44,7 @@ class AuthController extends Controller
             'type' => $request->type,
             'password' => Hash::make($request->password)
         ]);
-        $email = 'http://127.0.0.1:8000/Devincare/test';
+        $email = 'http://127.0.0.1:8000/Devincare/test/' . $user->id;
         Mail::to($request->input('email'))->send(new OtpVerificationMail($email));
         $token = $user->createToken('Token')->accessToken;
         if (!$user) {
@@ -149,20 +150,26 @@ class AuthController extends Controller
     {
         $obj = User::find($id);
         if ($obj) {
-            if ($image = $request->file('image')) {
-                $destinationPath = 'profileImage/';
-                $profileImage = date('YmdHis') . "." . $image->getClientOriginalExtension();
-                $image->move($destinationPath, $profileImage);
-                $input['image'] = "$profileImage";
-                $obj->image = $profileImage;
-            }
+            // if ($image = $request->file('image')) {
+            //     $destinationPath = 'profileImage/';
+            //     $profileImage = date('YmdHis') . "." . $image->getClientOriginalExtension();
+            //     $image->move($destinationPath, $profileImage);
+            //     $input['image'] = "$profileImage";
+            //     $obj->image = $profileImage;
+            // }
 
-            if ($image = $request->file('cover_image')) {
-                $destinationPath = 'coverImage/';
-                $profileImage = date('YmdHis') . "." . $image->getClientOriginalExtension();
-                $image->move($destinationPath, $profileImage);
-                $input['image'] = "$profileImage";
-                $obj->cover_image = $profileImage;
+            // if ($image = $request->file('cover_image')) {
+            //     $destinationPath = 'coverImage/';
+            //     $profileImage = date('YmdHis') . "." . $image->getClientOriginalExtension();
+            //     $image->move($destinationPath, $profileImage);
+            //     $input['image'] = "$profileImage";
+            //     $obj->cover_image = $profileImage;
+            // }
+            if (!empty($request->input('cover_image'))) {
+                $obj->cover_image = $request->input('cover_image');
+            }
+            if (!empty($request->input('image'))) {
+                $obj->image = $request->input('image');
             }
             if (!empty($request->input('name'))) {
                 $obj->name = $request->input('name');
@@ -207,7 +214,7 @@ class AuthController extends Controller
                 $obj->nationality = $request->input('nationality');
             }
             if (!empty($request->input('service'))) {
-                $obj->service = $request->input('service');
+                $obj->service =  json_encode($request->input('service'));
             }
             if (!empty($request->input('address'))) {
                 $obj->address = $request->input('address');

@@ -54,6 +54,7 @@ class RatingController extends Controller
             'data' => $rating,
         ]);
     }
+
   
     public function getRating(User $user)
     {

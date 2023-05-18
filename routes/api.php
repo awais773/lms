@@ -24,6 +24,12 @@ Route::post('adminRegister',[App\Http\Controllers\api\AdminAuthController::class
 Route::post('adminlogin',[App\Http\Controllers\api\AdminAuthController::class,'adminlogin']);
 Route::get('dashboard',[App\Http\Controllers\api\AdminAuthController::class,'dashboard']);
 
+      // testimonial
+Route::post('Addtestimonial',[App\Http\Controllers\api\AdminAuthController::class,'Addtestimonial']);
+Route::get('TestimonialGet',[App\Http\Controllers\api\AdminAuthController::class,'TestimonialGet']);
+Route::get('TestimonialGet/{id}',[App\Http\Controllers\api\AdminAuthController::class,'TestimonialShow']);
+Route::delete('TestimonialDestroy/{id}',[App\Http\Controllers\api\AdminAuthController::class,'TestimonialDestroy']);
+
 
   // user //
 
@@ -38,9 +44,27 @@ Route::get('/getOneTeacher/{id}',[App\Http\Controllers\api\AuthController::class
 
 
 Route::apiResource('subjects', App\Http\Controllers\api\SubjectController::class);
+Route::apiResource('resourses', App\Http\Controllers\api\ResourseController::class);
+Route::post('/resoursesUpdate/{id}', [App\Http\Controllers\api\ResourseController::class, 'update']);
+
+           //// course
+Route::post('/couresUpdate/{id}', [App\Http\Controllers\api\ResourseController::class, 'update']);
+Route::apiResource('coures', App\Http\Controllers\api\CourceController::class);
+Route::get('/indexgteAll', [App\Http\Controllers\api\CourceController::class, 'indexgteAll']);
+
+
+Route::apiResource('dacuments', App\Http\Controllers\api\DacumentController::class);
+Route::post('/dacumentsUpdate/{id}', [App\Http\Controllers\api\DacumentController::class, 'update']);
 
 
 
+               //blogs  
+
+Route::post('addBlog',[App\Http\Controllers\api\AdminAuthController::class,'addBlog']);
+Route::get('blogGet',[App\Http\Controllers\api\AdminAuthController::class,'blogGet']);
+Route::get('blogGet/{id}',[App\Http\Controllers\api\AdminAuthController::class,'show']);
+Route::delete('blogDestroy/{id}',[App\Http\Controllers\api\AdminAuthController::class,'blogDestroy']);
+Route::post('blogUpdate/{id}',[App\Http\Controllers\api\AdminAuthController::class,'update']);
 
 Route::middleware('auth:api')->group(function () {
 Route::post('/update/AdminProfile', [App\Http\Controllers\api\AdminAuthController::class, 'adminProfile']);
@@ -53,19 +77,12 @@ Route::get('/status/{id}',[App\Http\Controllers\api\AuthController::class,'statu
 Route::delete('/delete/{id}',[App\Http\Controllers\api\AuthController::class,'delete']);
 Route::get('/getTeacher',[App\Http\Controllers\api\AuthController::class,'getTeacher']);
 
- 
-        //
-Route::post('addBlog',[App\Http\Controllers\api\AdminAuthController::class,'addBlog']);
-Route::get('blogGet',[App\Http\Controllers\api\AdminAuthController::class,'blogGet']);
-Route::delete('blogDestroy/{id}',[App\Http\Controllers\api\AdminAuthController::class,'blogDestroy']);
-
        //     
 Route::delete('reviewDestroy/{id}',[App\Http\Controllers\api\AdminAuthController::class,'reviewDestroy']);
 Route::post('reviewAdd',[App\Http\Controllers\api\AdminAuthController::class,'reviewAdd']);
 Route::get('ReviewGet',[App\Http\Controllers\api\AdminAuthController::class,'ReviewGet']);
 
 
-Route::apiResource('coures', App\Http\Controllers\api\CourceController::class);
 Route::apiResource('packages', App\Http\Controllers\api\PackageController::class);
 Route::apiResource('promotions', App\Http\Controllers\api\PromotionController::class);
 Route::apiResource('subjects', App\Http\Controllers\api\SubjectController::class);

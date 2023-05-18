@@ -4,19 +4,21 @@ namespace App\Http\Controllers\api;
 use App\Models\Cource;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class CourceController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+   
     public function index()
     {
-        $Cource = Cource::latest()->with('class:id,name','subject:id,name')->get();
-        if (is_null($Cource)) {
+        $user = Auth::guard('api')->user();
+        $courses = Cource::latest()->with('class:id,name','subject:id,name','teacher')->whereIn('user_id', [$user->id])
+        ->get();
+        foreach ($courses as $course) {
+            $course->location = json_decode($course->location); // Decode the JSON-encoded location string
+        }
+        if (is_null($courses)) {
             return response()->json([
                 'success' => false,
                 'message' => 'data not found',
@@ -25,7 +27,26 @@ class CourceController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'All Data susccessfull',
-            'data' => $Cource,
+            'data' => $courses,
+        ]);
+    }
+
+    public function indexgteAll()
+    {
+        $courses = Cource::latest()->with('class:id,name','subject:id,name','teacher')->get();
+        foreach ($courses as $course) {
+            $course->location = json_decode($course->location); // Decode the JSON-encoded location string
+        }
+        if (is_null($courses)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'data not found',
+            ]);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => 'All Data susccessfull',
+            'data' => $courses,
         ]);
     }
 
@@ -40,68 +61,54 @@ class CourceController extends Controller
             return response()->json([
                 'success' => false,
                 'errors' => $validator->errors()
-    
             ], 400);
         }
-        if ($file = $req->file('video')) {
-            $video_name = md5(rand(1000, 10000));
-            $ext = strtolower($file->getClientOriginalExtension());
-            $video_full_name = $video_name . '.' . $ext;
-            $upload_path = 'course/';
-            $video_url = $upload_path . $video_full_name;
-            $file->move($upload_path, $video_url);
     
-            if ($thumbnail = $req->file('image')) {
-                $thumbnail_name = md5(rand(1000, 10000));
-                $ext = strtolower($thumbnail->getClientOriginalExtension());
-                $thumbnail_full_name = $thumbnail_name . '.' . $ext;
-                $upload_path = 'course/';
-                $thumbnail_url = $upload_path . $thumbnail_full_name;
-                $thumbnail->move($upload_path, $thumbnail_url);
-            } else {
-                $thumbnail_url = null;
-            }
-            $Cource = new Cource();
-            $Cource->name = $req->name;
-            $Cource->image = $thumbnail_url;
-            $Cource->video = $video_url;
-            $Cource->user_id = $req->user_id;
-            $Cource->details = $req->details;
-            $Cource->expertise = $req->expertise;
-            $Cource->class_id = $req->class_id;
-            $Cource->subject_id = $req->subject_id;
-            $Cource->location = $req->location;
-            
-            $Cource->save();
+        $user = Auth::guard('api')->user();
+        $Cource = new Cource();
+        $Cource->name = $req->name;
+        $Cource->user_id = $user->id;
+        $Cource->details = $req->details;
+        $Cource->expertise = $req->expertise;
+        $Cource->class_id = $req->class_id;
+        $Cource->subject_id = $req->subject_id;
+        $Cource->location = json_encode($req->location); // Store location as JSON-encoded string
+        $Cource->save();
     
-            return response()->json([
-                'success' => true,
-                'message' => 'Add Cource created successfully',
-                'data' => $Cource,
-            ], 200);
-        } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'Cource upload failed'
-            ], 400);
-        }
-    }
-
-   
-    public function show($id)
-    {
-        $Cource = Cource::with('class:id,name','subject:id,name')->where('id',$id)->first();
         if (is_null($Cource)) {
             return response()->json([
                 'success' => false,
-                'message' => 'data not found'
-            ], 404);
+                'message' => 'storage error'
+            ]);
         }
+    
         return response()->json([
             'success' => true,
+            'message' => 'Add Cource created successfully',
             'data' => $Cource,
-        ]);
+        ], 200);
     }
+    
+
+
+    public function show($id)
+{
+    $course = Cource::with('class:id,name','subject:id,name','teacher')->where('id',$id)->first();
+
+    if (is_null($course)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Course not found'
+        ], 404);
+    }
+    $course->location = json_decode($course->location); // Decode the JSON-encoded location string
+
+    return response()->json([
+        'success' => true,
+        'data' => $course,
+    ], 200);
+}
+
 
 
 
@@ -120,24 +127,6 @@ class CourceController extends Controller
                 'success' => false,
                 'message' => $validator->errors()->toJson(),
             ], 400);
-        }
-        if ($file = $req->file('video')) {
-            $video_name = md5(rand(1000, 10000));
-            $ext = strtolower($file->getClientOriginalExtension());
-            $video_full_name = $video_name . '.' . $ext;
-            $upload_path = 'course/';
-            $video_url = $upload_path . $video_full_name;
-            $file->move($upload_path, $video_url);
-            $video->video = $video_url;
-        }
-        if ($file = $req->file('image')) {
-            $thumbnail_name = md5(rand(1000, 10000));
-            $ext = strtolower($file->getClientOriginalExtension());
-            $thumbnail_full_name = $thumbnail_name . '.' . $ext;
-            $upload_path = 'course/';
-            $thumbnail_url = $upload_path . $thumbnail_full_name;
-            $file->move($upload_path, $thumbnail_url);
-            $video->image = $thumbnail_url;
         }
         $video->name = $req->name;
         $video->details = $req->details;

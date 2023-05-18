@@ -56,13 +56,7 @@ class SubjectController extends Controller
         $Subject->name = $req->name;
         $Subject->description = $req->description;
         $Subject->category_id = $req->category_id;
-        if ($image = $req->file('image')) {
-            $destinationPath = 'Subject/';
-            $profileImage = date('YmdHis') . "." . $image->getClientOriginalExtension();
-            $image->move($destinationPath, $profileImage);
-            $input['image'] = "$profileImage";
-            $Subject->image = $profileImage;
-        }
+        $Subject->image = $req->image;
         $Subject->save();
         if (is_null($Subject)) {
             return response()->json([

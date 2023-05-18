@@ -19,7 +19,7 @@ class Cource extends Model
     // ] ;
 
 
-    public function user() {
+    public function teacher() {
         return $this->hasOne(User::class, 'id', 'user_id');  
     }
 
