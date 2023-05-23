@@ -1,10 +1,11 @@
 <?php
 namespace App\Http\Controllers\api;
+use App\Models\File;
 use App\Models\Subject;
+use App\Models\Category;
 use Illuminate\Http\Request;
 use App\Helpers\FilterFunctions;
 use App\Http\Controllers\Controller;
-use App\Models\File;
 use Illuminate\Support\Facades\Validator;
 
 class SubjectController extends Controller
@@ -185,6 +186,31 @@ class SubjectController extends Controller
             'message' => 'All Data susccessfull',
             'data' => $Subject,
         ]);
+    }
+
+
+    public function dependencies()
+    {
+        $Subject = Subject::latest()->select('name')->get();
+        if (is_null($Subject)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'data not found',
+            ]);
+        }
+        $class = Category::latest()->select('name')->get();
+        if (is_null($Subject)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'data not found',
+            ]);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => 'All Data susccessfull',
+            'class' => $class,
+            'Subject' => $Subject,
+        ],200);
     }
 
 }

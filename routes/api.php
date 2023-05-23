@@ -29,7 +29,8 @@ Route::post('Addtestimonial',[App\Http\Controllers\api\AdminAuthController::clas
 Route::get('TestimonialGet',[App\Http\Controllers\api\AdminAuthController::class,'TestimonialGet']);
 Route::get('TestimonialGet/{id}',[App\Http\Controllers\api\AdminAuthController::class,'TestimonialShow']);
 Route::delete('TestimonialDestroy/{id}',[App\Http\Controllers\api\AdminAuthController::class,'TestimonialDestroy']);
-
+Route::get('/instructor',[App\Http\Controllers\api\AuthController::class,'instructor']);
+Route::get('/student',[App\Http\Controllers\api\AuthController::class,'student']);
 
   // user //
 
@@ -38,6 +39,7 @@ Route::post('login',[App\Http\Controllers\api\AuthController::class,'login']);
 Route::post('/forgotPassword', [App\Http\Controllers\api\AuthController::class, 'forgotPassword']);
 Route::post('/updatePassword', [App\Http\Controllers\api\AuthController::class, 'updatePassword']);
 Route::get('/fileGet', [App\Http\Controllers\api\SubjectController::class, 'fileGet']);
+Route::get('/dependencies', [App\Http\Controllers\api\SubjectController::class, 'dependencies']);
 Route::post('/addFile', [App\Http\Controllers\api\SubjectController::class, 'addFile']);
 Route::put('/update/profile/{id}', [App\Http\Controllers\api\AuthController::class, 'updateProfile']);
 Route::get('/getOneTeacher/{id}',[App\Http\Controllers\api\AuthController::class,'getOneTeacher']);
@@ -50,7 +52,7 @@ Route::post('/resoursesUpdate/{id}', [App\Http\Controllers\api\ResourseControlle
            //// course
 Route::post('/couresUpdate/{id}', [App\Http\Controllers\api\ResourseController::class, 'update']);
 Route::apiResource('coures', App\Http\Controllers\api\CourceController::class);
-Route::get('/indexgteAll', [App\Http\Controllers\api\CourceController::class, 'indexgteAll']);
+Route::get('/indexgetTeacher/{id}', [App\Http\Controllers\api\CourceController::class, 'indexgetTeacher']);
 
 
 Route::apiResource('dacuments', App\Http\Controllers\api\DacumentController::class);
@@ -71,8 +73,7 @@ Route::post('/update/AdminProfile', [App\Http\Controllers\api\AdminAuthControlle
 Route::post('/otp/verify', [App\Http\Controllers\api\AuthController::class, 'otpVerification']);
 Route::get('get-user',[App\Http\Controllers\api\AuthController::class,'userInfo']);
 Route::get('/logout',[App\Http\Controllers\api\AuthController::class,'logout']);
-Route::get('/instructor',[App\Http\Controllers\api\AuthController::class,'instructor']);
-Route::get('/student',[App\Http\Controllers\api\AuthController::class,'student']);
+
 Route::get('/status/{id}',[App\Http\Controllers\api\AuthController::class,'status']);
 Route::delete('/delete/{id}',[App\Http\Controllers\api\AuthController::class,'delete']);
 Route::get('/getTeacher',[App\Http\Controllers\api\AuthController::class,'getTeacher']);
@@ -92,6 +93,7 @@ Route::apiResource('ads', App\Http\Controllers\api\AdsController::class);
 Route::apiResource('roles', App\Http\Controllers\api\RoleController::class);
 Route::apiResource('userAdd', App\Http\Controllers\api\UserAddController::class);
 Route::apiResource('categories', App\Http\Controllers\api\CategoryController::class);
+Route::apiResource('payment', App\Http\Controllers\api\PaymentController::class);
 
 
        // rating //

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\api;
 use App\Models\Cource;
+use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -11,27 +12,6 @@ class CourceController extends Controller
 {
    
     public function index()
-    {
-        $user = Auth::guard('api')->user();
-        $courses = Cource::latest()->with('class:id,name','subject:id,name','teacher')->whereIn('user_id', [$user->id])
-        ->get();
-        foreach ($courses as $course) {
-            $course->location = json_decode($course->location); // Decode the JSON-encoded location string
-        }
-        if (is_null($courses)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'data not found',
-            ]);
-        }
-        return response()->json([
-            'success' => true,
-            'message' => 'All Data susccessfull',
-            'data' => $courses,
-        ]);
-    }
-
-    public function indexgteAll()
     {
         $courses = Cource::latest()->with('class:id,name','subject:id,name','teacher')->get();
         foreach ($courses as $course) {
@@ -109,9 +89,6 @@ class CourceController extends Controller
     ], 200);
 }
 
-
-
-
     public function update(Request $req, $id)
     {
         $video = Cource::find($id);
@@ -159,4 +136,31 @@ class CourceController extends Controller
             ]);
         }
     }
+
+    public function indexgetTeacher($user_id)
+    {
+        $user = User::find($user_id);
+        if ($user === null) {
+            return response()->json([
+                'success' => false,
+                'message' => 'user not found'
+            ], 404);
+        }
+        $courses = Cource::latest()->with('class:id,name','subject:id,name','teacher')->whereIn('user_id', [$user->id])->get();
+        foreach ($courses as $course) {
+            $course->location = json_decode($course->location); // Decode the JSON-encoded location string
+        }
+        if (is_null($courses)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'data not found',
+            ]);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => 'All Data susccessfull',
+            'data' => $courses,
+        ]);
+    }
+
 }
