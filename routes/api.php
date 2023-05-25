@@ -49,16 +49,18 @@ Route::apiResource('subjects', App\Http\Controllers\api\SubjectController::class
 Route::apiResource('resourses', App\Http\Controllers\api\ResourseController::class);
 Route::post('/resoursesUpdate/{id}', [App\Http\Controllers\api\ResourseController::class, 'update']);
 
+             //// qualigication
+
+Route::apiResource('qualification', App\Http\Controllers\api\QualificationController::class);
+
            //// course
 Route::post('/couresUpdate/{id}', [App\Http\Controllers\api\ResourseController::class, 'update']);
-Route::apiResource('coures', App\Http\Controllers\api\CourceController::class);
 Route::get('/indexgetTeacher/{id}', [App\Http\Controllers\api\CourceController::class, 'indexgetTeacher']);
+Route::post('/filter_course', [App\Http\Controllers\api\CourceController::class, 'search']);
 
 
 Route::apiResource('dacuments', App\Http\Controllers\api\DacumentController::class);
 Route::post('/dacumentsUpdate/{id}', [App\Http\Controllers\api\DacumentController::class, 'update']);
-
-
 
                //blogs  
 
@@ -94,6 +96,7 @@ Route::apiResource('roles', App\Http\Controllers\api\RoleController::class);
 Route::apiResource('userAdd', App\Http\Controllers\api\UserAddController::class);
 Route::apiResource('categories', App\Http\Controllers\api\CategoryController::class);
 Route::apiResource('payment', App\Http\Controllers\api\PaymentController::class);
+Route::apiResource('coures', App\Http\Controllers\api\CourceController::class);
 
 
        // rating //

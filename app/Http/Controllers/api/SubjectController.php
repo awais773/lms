@@ -6,6 +6,7 @@ use App\Models\Category;
 use Illuminate\Http\Request;
 use App\Helpers\FilterFunctions;
 use App\Http\Controllers\Controller;
+use App\Models\qualification;
 use Illuminate\Support\Facades\Validator;
 
 class SubjectController extends Controller
@@ -191,14 +192,21 @@ class SubjectController extends Controller
 
     public function dependencies()
     {
-        $Subject = Subject::latest()->select('name')->get();
+        $Subject = Subject::latest()->select('id','name')->get();
         if (is_null($Subject)) {
             return response()->json([
                 'success' => false,
                 'message' => 'data not found',
             ]);
         }
-        $class = Category::latest()->select('name')->get();
+        $class = Category::latest()->select('id','name')->get();
+        if (is_null($Subject)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'data not found',
+            ]);
+        }
+        $qualification = qualification::latest()->select('id','name')->get();
         if (is_null($Subject)) {
             return response()->json([
                 'success' => false,
@@ -210,6 +218,7 @@ class SubjectController extends Controller
             'message' => 'All Data susccessfull',
             'class' => $class,
             'Subject' => $Subject,
+            'qualification' => $qualification,
         ],200);
     }
 

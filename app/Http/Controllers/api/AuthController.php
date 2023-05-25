@@ -4,6 +4,8 @@ namespace App\Http\Controllers\api;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Mail\OtpVerificationMails;
+use Illuminate\Support\Str;
 use App\Mail\OtpVerificationMail;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -33,18 +35,21 @@ class AuthController extends Controller
 
             ], 400);
         }
-
+        $randomId = rand(100,999);
+        $locations = $request->input('location'); // Assuming the input is an array of locations
+        $locationString = json_encode($locations); // Convert array to a JSON string
         $user = User::create([
+            'id' => $randomId, // Assign the random ID
             'name' => $request->name,
             'city' => $request->city,
             'email' => $request->email,
             'country' => $request->country,
             'mobile_number' => $request->mobile_number,
-            'location' => $request->location,
+            'location' => $locationString, // Store locations as a string
             'type' => $request->type,
             'password' => Hash::make($request->password)
         ]);
-        $email = 'http://127.0.0.1:8000/Devincare/test/' . $user->id;
+        $email = 'http://127.0.0.1:8000/Devincare/test/' . $randomId;
         Mail::to($request->input('email'))->send(new OtpVerificationMail($email));
         $token = $user->createToken('Token')->accessToken;
         if (!$user) {
@@ -132,7 +137,7 @@ class AuthController extends Controller
             $otp = rand(100000, 999999);
             $checkEmail->otp_number = $otp;
             $checkEmail->update();
-            Mail::to($request->email)->send(new OtpVerificationMail($otp));
+            Mail::to($request->email)->send(new OtpVerificationMails($otp));
             $token = $checkEmail->createToken('assessment')->accessToken;
             $this->$checkEmail['token'] = 'Bearer ' . $token;
             return response()->json([
@@ -151,21 +156,6 @@ class AuthController extends Controller
     {
         $obj = User::find($id);
         if ($obj) {
-            // if ($image = $request->file('image')) {
-            //     $destinationPath = 'profileImage/';
-            //     $profileImage = date('YmdHis') . "." . $image->getClientOriginalExtension();
-            //     $image->move($destinationPath, $profileImage);
-            //     $input['image'] = "$profileImage";
-            //     $obj->image = $profileImage;
-            // }
-
-            // if ($image = $request->file('cover_image')) {
-            //     $destinationPath = 'coverImage/';
-            //     $profileImage = date('YmdHis') . "." . $image->getClientOriginalExtension();
-            //     $image->move($destinationPath, $profileImage);
-            //     $input['image'] = "$profileImage";
-            //     $obj->cover_image = $profileImage;
-            // }
             if (!empty($request->input('cover_image'))) {
                 $obj->cover_image = $request->input('cover_image');
             }
@@ -194,7 +184,7 @@ class AuthController extends Controller
                 $obj->country = $request->input('country');
             }
             if (!empty($request->input('location'))) {
-                $obj->location = $request->input('location');
+                $obj->location =  json_encode($request->input('location'));
             }
             if (!empty($request->input('information'))) {
                 $obj->information = $request->input('information');
@@ -220,6 +210,13 @@ class AuthController extends Controller
             if (!empty($request->input('address'))) {
                 $obj->address = $request->input('address');
             }
+            if (!empty($request->input('volunteer'))) {
+                $obj->volunteer = $request->input('volunteer');
+            }
+
+            // if (!empty($request->input('volunteer'))) {
+            //     $obj->volunteer = $request->input('volunteer') === 'true';
+            // }
 
             if ($obj->save()) {
                 $this->data = $obj;
@@ -339,19 +336,23 @@ class AuthController extends Controller
 
             public function getOneTeacher($id)
             {
-                $User = User::where('id', $id)->first();
-                if (is_null($User)) {
+                $user = User::where('id', $id)->first();
+                if (is_null($user)) {
                     return response()->json([
                         'success' => false,
-                        'message' => 'data not found'
+                        'message' => 'Data not found'
                     ], 404);
                 }
+                
+                $user->location = json_decode($user->location); // Decode the JSON-encoded location string
+                
                 return response()->json([
                     'success' => true,
-                    'message' => 'All Data susccessfull',
-                    'data' => $User,
+                    'message' => 'Data retrieval successful',
+                    'data' => $user,
                 ]);
-            } 
+            }
+            
        
     }
 

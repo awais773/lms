@@ -163,4 +163,144 @@ class CourceController extends Controller
         ]);
     }
 
+
+
+    // public function search(Request $request)
+    // {
+    //     $query = Cource::query();
+    
+    //     // Apply filters based on request parameters
+    //     if ($request->input('class_id')) {
+    //         $query->where('class_id', $request->input('class_id'));
+    //     }
+    
+    //     if ($request->input('subject_id')) {
+    //         $query->where('subject_id', $request->input('subject_id'));
+    //     }
+    
+    //     if ($request->input('teacher_id')) {
+    //         $query->whereHas('teacher', function ($subquery) use ($request) {
+    //             $subquery->where('id', $request->input('teacher_id'));
+    //         });
+    //     }
+    
+    //     if ($request->input('location')) {
+    //         $query->where('location', 'LIKE', '%' . $request->input('location') . '%');
+    //     }
+    
+    //     if ($request->input('name')) {
+    //         $query->where('name', 'LIKE', '%' . $request->input('name') . '%');
+    //     }
+    
+    //     if ($request->input('subject_name')) {
+    //         $query->whereHas('subject', function ($subquery) use ($request) {
+    //             $subquery->where('name', 'LIKE', '%' . $request->input('subject_name') . '%');
+    //         });
+    //     }
+    
+    //     if ($request->input('teacher_price')) {
+    //         $query->whereHas('teacher', function ($subquery) use ($request) {
+    //             $subquery->where('price', $request->input('teacher_price'));
+    //         });
+    //     }
+    
+    //     if ($request->input('teacher_volunteer')) {
+    //         $query->whereHas('teacher', function ($subquery) use ($request) {
+    //             $subquery->where('volunteer', $request->input('teacher_volunteer'));
+    //         });
+    //     }
+    
+    //     $courses = $query->with('class:id,name', 'subject:id,name', 'teacher')
+    //         ->latest()
+    //         ->get();
+    
+    //     foreach ($courses as $course) {
+    //         $course->location = json_decode($course->location); // Decode the JSON-encoded location string
+    //     }
+    
+    //     if ($courses->isEmpty()) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Data not found.',
+    //         ]);
+    //     }
+    
+    //     return response()->json([
+    //         'success' => true,
+    //         'message' => 'All data retrieved successfully.',
+    //         'data' => $courses,
+    //     ]);
+    // }
+    
+    
+    public function search(Request $request)
+    {
+        $query = Cource::query();
+    
+        // Apply filters based on request parameters
+        if ($request->input('class_id')) {
+            $query->where('class_id', $request->input('class_id'));
+        }
+    
+        if ($request->input('subject_id')) {
+            $query->where('subject_id', $request->input('subject_id'));
+        }
+    
+        if ($request->input('teacher_id')) {
+            $query->whereHas('teacher', function ($subquery) use ($request) {
+                $subquery->where('id', $request->input('teacher_id'));
+            });
+        }
+    
+        if ($request->input('location')) {
+            $query->where('location', 'LIKE', '%' . $request->input('location') . '%');
+        }
+    
+        if ($request->input('name')) {
+            $query->where('name', 'LIKE', '%' . $request->input('name') . '%');
+        }
+    
+        if ($request->input('subject_name')) {
+            $query->whereHas('subject', function ($subquery) use ($request) {
+                $subquery->where('name', 'LIKE', '%' . $request->input('subject_name') . '%');
+            });
+        }
+    
+        if ($request->input('teacher_price')) {
+            $query->whereHas('teacher', function ($subquery) use ($request) {
+                $subquery->where('price', $request->input('teacher_price'));
+            });
+        }
+        if ($request->input('teacher_volunteer')) {
+            $query->whereHas('teacher', function ($subquery) use ($request) {
+                $subquery->where('volunteer', $request->input('teacher_volunteer'));
+            });
+        }
+        $start = $request->input('start', 0); // Starting index, default is 0
+        $length = $request->input('length', 1000); // Number of items per page, default is 10
+        $courses = $query->with('class:id,name', 'subject:id,name', 'teacher')
+            ->latest()
+            ->skip($start)
+            ->take($length)
+            ->get();
+    
+        foreach ($courses as $course) {
+            $course->location = json_decode($course->location); // Decode the JSON-encoded location string
+        }
+    
+        if ($courses->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data not found.',
+            ]);
+        }
+    
+        return response()->json([
+            'success' => true,
+            'message' => 'All data retrieved successfully.',
+            'data' => $courses,
+        ]);
+    }
+    
+
 }
