@@ -4,9 +4,8 @@ namespace App\Http\Controllers\api;
 
 use App\Models\User;
 use Illuminate\Http\Request;
-use App\Mail\OtpVerificationMails;
-use Illuminate\Support\Str;
 use App\Mail\OtpVerificationMail;
+use App\Mail\OtpVerificationMails;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -24,7 +23,7 @@ class AuthController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required',
+            // 'password' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -35,21 +34,23 @@ class AuthController extends Controller
 
             ], 400);
         }
-        $randomId = rand(100,999);
-        $locations = $request->input('location'); // Assuming the input is an array of locations
-        $locationString = json_encode($locations); // Convert array to a JSON string
+    $randomId = rand(100,999);
+    $locations = $request->input('location');
+     $locationString = json_encode($locations); 
         $user = User::create([
             'id' => $randomId, // Assign the random ID
             'name' => $request->name,
+            'last_name' => $request->last_name,
             'city' => $request->city,
             'email' => $request->email,
             'country' => $request->country,
             'mobile_number' => $request->mobile_number,
             'location' => $locationString, // Store locations as a string
             'type' => $request->type,
+            'social_type' => $request->social_type,
             'password' => Hash::make($request->password)
         ]);
-        $email = 'http://127.0.0.1:8000/Devincare/test/' . $randomId;
+       $email = 'https://besttutorforyou.com/verifytutor/' . $randomId;
         Mail::to($request->input('email'))->send(new OtpVerificationMail($email));
         $token = $user->createToken('Token')->accessToken;
         if (!$user) {
@@ -64,13 +65,20 @@ class AuthController extends Controller
     }
 
 
-    public function login(Request $request)
+ public function login(Request $request)
     {
         $data = [
             'email' => $request->email,
             'password' => $request->password,
             'type' => $request->type,
         ];
+
+        $credentials = [
+            'email' => $request->email,
+            'type' => $request->type,
+            'social_type' => $request->social_type,
+        ];
+      
         if (auth()->attempt($data)) {
             $token = auth()->user()->createToken('Token')->accessToken;
             return response()->json([
@@ -79,7 +87,16 @@ class AuthController extends Controller
                 'user' => User::with('role')->find(Auth::id()),
                 'token' => $token,
             ], 200);
-        } else {
+        }elseif ($check = User::where($credentials)->first()) {
+            $token = $check->createToken('Token')->accessToken;
+            return response()->json([
+                'success' => true,
+                'message' => 'Login successful',
+                'user' => User::with('role')->find($check->id),
+                'token' => $token,
+            ], 200);
+        }
+        else {
             return response()->json([
                 'success' => false,
                 'error' => 'Unauthorized',
@@ -88,10 +105,15 @@ class AuthController extends Controller
         }
     }
 
-    public function userinfo()
+
+    public function AllUser()
     {
-        $user = auth()->user();
-        return response()->json(['user' => $user], 200);
+        $user = User::select('id','name','last_name','image')->get();
+        return response()->json([
+        'Success' => true,
+        'message' => 'All Data successfully ',
+        'data' => $user
+        ], 200);
     }
 
     public function logout()
@@ -104,30 +126,40 @@ class AuthController extends Controller
 
         ], 200);
     }
-    public function otpVerification(Request $request)
+    
+   public function otpVerification(Request $request)
     {
         $otp = $request->input('otp');
-        $id = $request->user()->id;
-        if (!empty($otp)) {
-            $obj = User::where('otp_number', $otp)->where('id', $id)->first();
-            if (!empty($obj)) {
-                $obj->otp_verify = 1;
-                $obj->save();
-                $user = User::find($id);
-                $token = $user->createToken('assessment')->accessToken;
-                $user = $user->toArray();
+        $email = $request->input('email');
+        
+        $this->success = false;
+        $this->message = 'Please enter a valid OTP number';
+        $this->data = [];
+        
+        // Check if OTP and email are provided
+        if (!empty($otp) && !empty($email)) {
+            // Find the user by matching 'otp_number' and 'email'
+            $user = User::where('otp_number', $otp)->where('email', $email)->first();
+            
+            if ($user) {
+                $user->otp_verify = 1;
+                $user->save();                
+                $token = $user->createToken('assessment')->accessToken;                
+                $userData = $user->toArray();
                 $this->data['token'] = 'Bearer ' . $token;
-                $this->data['user'] = $user;
-                $this->message = ' successfully';
+                $this->data['user'] = $userData;                
                 $this->success = true;
-            } else {
-                $this->message = 'Please enter valid otp number';
-                $this->success = false;
+                $this->message = 'Verification successful';
             }
         }
-
-        return response()->json(['success' => $this->success, 'message' => $this->message, 'data' => $this->data]);
+        
+        return response()->json([
+            'success' => $this->success,
+            'message' => $this->message,
+            'data' => $this->data
+        ]);
     }
+    
 
     public function forgotPassword(Request $request)
     {
@@ -152,7 +184,7 @@ class AuthController extends Controller
     }
 
 
-    public function updateProfile(Request $request, $id)
+   public function updateProfile(Request $request, $id)
     {
         $obj = User::find($id);
         if ($obj) {
@@ -164,6 +196,9 @@ class AuthController extends Controller
             }
             if (!empty($request->input('name'))) {
                 $obj->name = $request->input('name');
+            }
+            if (!empty($request->input('last_name'))) {
+                $obj->last_name = $request->input('last_name');
             }
             if (!empty($request->input('price'))) {
                 $obj->price = $request->input('price');
@@ -184,7 +219,7 @@ class AuthController extends Controller
                 $obj->country = $request->input('country');
             }
             if (!empty($request->input('location'))) {
-                $obj->location =  json_encode($request->input('location'));
+                $obj->location = $request->input('location');
             }
             if (!empty($request->input('information'))) {
                 $obj->information = $request->input('information');
@@ -195,28 +230,54 @@ class AuthController extends Controller
             if (!empty($request->input('age'))) {
                 $obj->age = $request->input('age');
             } 
-            if (!empty($request->input('skills'))) {
-                $obj->skills = $request->input('skills');
+             if (!empty($request->input('skills'))) {
+                $obj->skills =  json_encode($request->input('skills'));
             }
-            if (!empty($request->input('link'))) {
-                $obj->link = $request->input('link');
+             if (!empty($request->input('twitter_link'))) {
+                $obj->twitter_link = $request->input('twitter_link'); 
             }
             if (!empty($request->input('nationality'))) {
                 $obj->nationality = $request->input('nationality');
             }
-            if (!empty($request->input('service'))) {
+           if (!empty($request->input('service'))) {
                 $obj->service =  json_encode($request->input('service'));
             }
             if (!empty($request->input('address'))) {
                 $obj->address = $request->input('address');
             }
-            if (!empty($request->input('volunteer'))) {
+             if (!empty($request->input('city'))) {
+                $obj->city = $request->input('city');
+            }
+           if (!empty($request->input('volunteer'))) {
                 $obj->volunteer = $request->input('volunteer');
             }
+              if (!empty($request->input('qualification_id'))) {
+                $obj->qualification_id = $request->input('qualification_id');
+            }
+            if (!empty($request->input('date_birth'))) {
+                $obj->date_birth = $request->input('date_birth');
+            }
+             if (!empty($request->input('facbook_link'))) {
+                $obj->facbook_link = $request->input('facbook_link');
+            }
+            if (!empty($request->input('insta_link'))) {
+                $obj->insta_link = $request->input('insta_link');
+            }
+            if (!empty($request->input('youtub_link'))) {
+                $obj->youtub_link = $request->input('youtub_link');
+            }
+            if (!empty($request->input('pack_price_1'))) {
+                $obj->pack_price_1 = $request->input('pack_price_1');
+            }
+            if (!empty($request->input('pack_price_2'))) {
+                $obj->pack_price_2 = $request->input('pack_price_2');
+            }
+            if (!empty($request->input('webcam_price'))) {
+                $obj->webcam_price = $request->input('webcam_price');
+            }
 
-            // if (!empty($request->input('volunteer'))) {
-            //     $obj->volunteer = $request->input('volunteer') === 'true';
-            // }
+
+            
 
             if ($obj->save()) {
                 $this->data = $obj;
@@ -247,12 +308,35 @@ class AuthController extends Controller
         }
         return response()->json(['success' => false, 'message' => 'Failed! something went wrong',]);
     }
+    
+    
+      public function PasswordChanged(Request $request)
+    {
+        $this->validate($request, [
+            'old_password' => 'required',
+        ]);
+    
+        $user = Auth::user();
+        if ($user) {
+            // Check if the old password is correct
+            if (Hash::check($request->old_password, $user->password)) {
+                $user['password'] = Hash::make($request->password);
+                $user->save();
+    
+                return response()->json(['success' => true, 'message' => 'Success! Password has been changed']);
+            } else {
+                return response()->json(['success' => false, 'message' => 'Failed! Old password is incorrect']);
+            }
+        }
+    
+        return response()->json(['success' => false, 'message' => 'Failed! Something went wrong']);
+    }
 
     public function instructor()
     {
         $data = User::with('role')->where('type','1')->get();
         if (is_null($data)) {
-            return response()->json('data not found',);
+            return response()->json('data not found');
         }
         return response()->json([
             'success' => true,
@@ -315,8 +399,9 @@ class AuthController extends Controller
                     ]);
                 }  
             }
-
-            public function getTeacher()
+            
+            
+             public function getTeacher()
             {
                 $user = Auth::with('role')->guard('api')->user();
                 $users = User::whereIn('id', $user)->get();
@@ -332,11 +417,11 @@ class AuthController extends Controller
                     'data' => $users,
                 ]);
             }
-
-
+            
+            
             public function getOneTeacher($id)
             {
-                $user = User::where('id', $id)->first();
+                $user = User::with('qualification')->where('id', $id)->first();
                 if (is_null($user)) {
                     return response()->json([
                         'success' => false,
@@ -344,7 +429,9 @@ class AuthController extends Controller
                     ], 404);
                 }
                 
-                $user->location = json_decode($user->location); // Decode the JSON-encoded location string
+                $user->location = json_decode($user->location); 
+              $user->skills = json_decode($user->skills);
+                // Decode the JSON-encoded location string
                 
                 return response()->json([
                     'success' => true,
@@ -352,7 +439,6 @@ class AuthController extends Controller
                     'data' => $user,
                 ]);
             }
-            
        
     }
 

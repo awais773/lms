@@ -60,6 +60,10 @@ class User extends Authenticatable
         return $this->hasOne(Role::class, 'id', 'role_id');  
     }
 
+    public function qualification() {
+        return $this->hasOne(qualification::class, 'id', 'qualification_id');  
+    }
+
     public function ratings()
 {
     return $this->hasMany(Rating::class);

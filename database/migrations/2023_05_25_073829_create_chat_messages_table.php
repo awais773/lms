@@ -6,16 +6,19 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
+    /** 
      * Run the migrations.
      *
      * @return void
      */
     public function up()
     {
-        Schema::create('blogs', function (Blueprint $table) {
-          
-          
+        Schema::create('chat_messages', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('user_id')->nullable();
+            $table->unsignedBigInteger('sender_id')->nullable();
+            $table->text('message')->nullable();
+            $table->timestamps();
         });
     }
 
@@ -26,6 +29,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('blogs');
+        Schema::dropIfExists('chat_messages');
     }
 };

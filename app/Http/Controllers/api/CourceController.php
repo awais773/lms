@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use PHPUnit\Framework\Constraint\Count;
 
 class CourceController extends Controller
 {
@@ -299,6 +300,26 @@ class CourceController extends Controller
             'success' => true,
             'message' => 'All data retrieved successfully.',
             'data' => $courses,
+        ]);
+    }
+
+
+    public function allSearch(Request $request)
+    {
+        $query = $request->input('query');
+        $users = User::where('name', 'LIKE', "%$query%")->select('id','name','last_name')->get();
+        $courses = Cource::where('name', 'LIKE', "%$query%")
+                        ->orWhereHas('subject', function ($subQuery) use ($query) {
+                            $subQuery->where('name', 'LIKE', "%$query%");
+                        })
+                        ->orWhereHas('class', function ($subQuery) use ($query) {
+                            $subQuery->where('name', 'LIKE', "%$query%");
+                        })
+                        ->select('id','name','subject_id','class_id')->get();
+        return response()->json([
+            'success' => true,
+            'users' => $users,
+            'courses' => $courses
         ]);
     }
     

@@ -1,9 +1,11 @@
 <?php
 
 namespace App\Providers;
-
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\ServiceProvider;
+use App\Events\NewMessageEvent;
+use App\Listeners\SendNewMessageNotification;
 
 class BroadcastServiceProvider extends ServiceProvider
 {
@@ -14,8 +16,10 @@ class BroadcastServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        Broadcast::routes();
-
-        require base_path('routes/channels.php');
+        Broadcast::channel('chat-channel', function ($user) {
+            return true; // Customize the channel authorization logic if needed
+        });
+    
+        Event::listen(NewMessageEvent::class, SendNewMessageNotification::class);
     }
 }

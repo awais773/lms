@@ -69,8 +69,7 @@ class PaymentController extends Controller
 
     public function show($id)
 {
-    $Payment = BanksPayment::where('id',$id)->first();
-
+    $Payment = BanksPayment::where('user_id',$id)->get();
     if (is_null($Payment)) {
         return response()->json([
             'success' => false,
@@ -99,6 +98,36 @@ class PaymentController extends Controller
                 'message' => 'something wrong try again ',
             ]);
         }
+    }
+
+    public function update(Request $req, $id)
+    {
+        $Payment = BanksPayment::find($id);
+        if (is_null($Payment)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Payment not found',
+            ], 404);
+        }
+        $validator = Validator::make($req->all(), []);
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors()->toJson(),
+            ], 400);
+        }
+        $Payment->code = $req->code;
+        $Payment->mobile_no = $req->mobile_no;
+        $Payment->account_name = $req->account_name;
+        $Payment->account_no = $req->account_no;
+        $Payment->bank_name = $req->bank_name;
+        $Payment->type = $req->type;
+        $Payment->save();
+        return response()->json([
+            'success' => true,
+            'message' => 'Payment updated successfully',
+            'data' => $Payment,
+        ], 200);
     }
 
 
