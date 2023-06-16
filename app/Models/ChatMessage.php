@@ -14,4 +14,8 @@ class ChatMessage extends Model
         'sender_id'
     ];
 
+    protected $attributes = [
+        'seen' => 0,
+    ];
+
 }

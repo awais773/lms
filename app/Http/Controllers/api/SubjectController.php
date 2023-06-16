@@ -1,12 +1,15 @@
 <?php
 namespace App\Http\Controllers\api;
 use App\Models\File;
+use App\Models\User;
 use App\Models\Subject;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use App\Models\qualification;
 use App\Helpers\FilterFunctions;
 use App\Http\Controllers\Controller;
-use App\Models\qualification;
+use App\Models\Subject_Skill;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class SubjectController extends Controller
@@ -213,12 +216,65 @@ class SubjectController extends Controller
                 'message' => 'data not found',
             ]);
         }
+        $user = Auth::guard('api')->user();
+        $skills = json_decode($user->skills);
+        if (is_null($skills)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'data not found',
+            ]);
+        }
         return response()->json([
             'success' => true,
             'message' => 'All Data susccessfull',
             'class' => $class,
             'Subject' => $Subject,
             'qualification' => $qualification,
+            'skills' => $skills,
+        ],200);
+    }
+
+
+    public function dependenciesAll()
+    {
+        $Subject = Subject::latest()->select('id','name')->get();
+        if (is_null($Subject)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'data not found',
+            ]);
+        }
+        $class = Category::latest()->select('id','name')->get();
+        if (is_null($Subject)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'data not found',
+            ]);
+        }
+        $qualification = qualification::latest()->select('id','name')->get();
+        if (is_null($Subject)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'data not found',
+            ]);
+        }
+        $skills = Subject_Skill::select('id','subject_skills')->get();
+        foreach ($skills as $course) {
+            $course->subject_skills = json_decode($course->subject_skills); // Decode the JSON-encoded location string
+        }
+        if (is_null($skills)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'data not found',
+            ]);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => 'All Data susccessfull',
+            'class' => $class,
+            'Subject' => $Subject,
+            'qualification' => $qualification,
+            'skills' => $skills,
         ],200);
     }
 

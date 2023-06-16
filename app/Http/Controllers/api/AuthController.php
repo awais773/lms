@@ -10,6 +10,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
@@ -26,7 +27,7 @@ class AuthController extends Controller
             // 'password' => 'required',
         ]);
 
-        if ($validator->fails()) {
+        if ($validator->fails()) { 
             return response()->json([
                 'success' => false,
                 // 'message' => $validator->errors()->toJson() 
@@ -34,8 +35,8 @@ class AuthController extends Controller
 
             ], 400);
         }
-    $randomId = rand(100,999);
-    $locations = $request->input('location');
+        $randomId = rand(1000000, 9999999);
+        $locations = $request->input('location');
      $locationString = json_encode($locations); 
         $user = User::create([
             'id' => $randomId, // Assign the random ID
@@ -65,56 +66,102 @@ class AuthController extends Controller
     }
 
 
- public function login(Request $request)
-    {
-        $data = [
-            'email' => $request->email,
-            'password' => $request->password,
-            'type' => $request->type,
-        ];
+//  public function login(Request $request)
+//     {
+//         $data = [
+//             'email' => $request->email,
+//             'password' => $request->password,
+//             'type' => $request->type,
+//         ];
 
-        $credentials = [
-            'email' => $request->email,
-            'type' => $request->type,
-            'social_type' => $request->social_type,
-        ];
+//         $credentials = [
+//             'email' => $request->email,
+//             'type' => $request->type,
+//             'social_type' => $request->social_type,
+//         ];
       
-        if (auth()->attempt($data)) {
-            $token = auth()->user()->createToken('Token')->accessToken;
-            return response()->json([
-                'success' => true,
-                'message' => 'login successfull',
-                'user' => User::with('role')->find(Auth::id()),
-                'token' => $token,
-            ], 200);
-        }elseif ($check = User::where($credentials)->first()) {
-            $token = $check->createToken('Token')->accessToken;
-            return response()->json([
-                'success' => true,
-                'message' => 'Login successful',
-                'user' => User::with('role')->find($check->id),
-                'token' => $token,
-            ], 200);
-        }
-        else {
-            return response()->json([
-                'success' => false,
-                'error' => 'Unauthorized',
-                'message' => 'Please Check your Credentials'
-            ], 401);
-        }
-    }
+//         if (auth()->attempt($data)) {
+//             $token = auth()->user()->createToken('Token')->accessToken;
+//             return response()->json([
+//                 'success' => true,
+//                 'message' => 'login successfull',
+//                 'user' => User::find(Auth::id()),
+//                 'token' => $token,
+//             ], 200);
+//         }elseif ($check = User::where($credentials)->first()) {
+//             $token = $check->createToken('Token')->accessToken;
+//             return response()->json([
+//                 'success' => true,
+//                 'message' => 'Login successful',
+//                 'user' => User::find($check->id),
+//                 'token' => $token,
+//             ], 200);
+//         }
+//         else {
+//             return response()->json([
+//                 'success' => false,
+//                 'error' => 'Unauthorized',
+//                 'message' => 'Please Check your Credentials'
+//             ], 401);
+//         }
+//     }
 
+public function login(Request $request)
+{
+    $credentials = [
+        'email' => $request->email,
+        'password' => $request->password,
+        'type' => $request->type,
+    ];
 
-    public function AllUser()
-    {
-        $user = User::select('id','name','last_name','image')->get();
+    $socialCredentials = [
+        'email' => $request->email,
+        'type' => $request->type,
+        'social_type' => $request->social_type,
+    ];
+
+    $user = User::where('email', $request->email)
+                 ->where('type', $request->type)
+                 ->first();
+
+    if ($user && $user->social_type === 'google') {
+        // Login using social_type 'google'
+        // Perform any additional checks or validation specific to 'google'
+        $token = $user->createToken('Token')->accessToken;
+        $user->skills = json_decode($user->skills); // Decode the JSON-encoded skills property
+
         return response()->json([
-        'Success' => true,
-        'message' => 'All Data successfully ',
-        'data' => $user
+            'success' => true,
+            'message' => 'Login successful',
+            'user' => $user,
+            'token' => $token,
         ], 200);
+    } elseif (auth()->attempt($credentials)) {
+        // Login using email, password, and type
+        $user = auth()->user();
+        $token = $user->createToken('Token')->accessToken;
+        $user->skills = json_decode($user->skills); // Decode the JSON-encoded skills property
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Login successful',
+            'user' => $user,
+            'token' => $token,
+        ], 200);
+    } else {
+        return response()->json([
+            'success' => false,
+            'error' => 'Unauthorized',
+            'message' => 'Please check your credentials',
+        ], 401);
     }
+}
+
+
+
+
+
+   
 
     public function logout()
     {
@@ -188,6 +235,7 @@ class AuthController extends Controller
     {
         $obj = User::find($id);
         if ($obj) {
+            $token = $obj->createToken('Token')->accessToken;
             if (!empty($request->input('cover_image'))) {
                 $obj->cover_image = $request->input('cover_image');
             }
@@ -276,17 +324,21 @@ class AuthController extends Controller
                 $obj->webcam_price = $request->input('webcam_price');
             }
 
-
-            
-
             if ($obj->save()) {
                 $this->data = $obj;
                 $this->success = true;
                 $this->message = 'Profile is updated successfully';
+
             }
         }
 
-        return response()->json(['success' => $this->success, 'message' => $this->message, 'data' => $this->data,]);
+        return response()->json(['success' => $this->success, 'message' => $this->message, 
+        
+        'data' => $this->data,
+        'user_id' => $id  ?? null,
+        'token' => $token ?? null
+    
+    ]);
     }
 
     public function updatePassword(Request $request)
@@ -437,6 +489,26 @@ class AuthController extends Controller
                     'success' => true,
                     'message' => 'Data retrieval successful',
                     'data' => $user,
+                ]);
+            }
+
+
+            public function resendEmail(Request $request)
+            {
+                $userId = $request->input('id');                
+                $user = User::find($userId);
+                if (!$user) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'User not found',
+                    ]);
+                }
+                $email = 'https://besttutorforyou.com/verifytutor/' . $userId;
+                // Send the email
+                Mail::to($user->email)->send(new OtpVerificationMail($email));
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Email sent successfully',
                 ]);
             }
        

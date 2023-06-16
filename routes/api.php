@@ -47,11 +47,10 @@ Route::post('login',[App\Http\Controllers\api\AuthController::class,'login']);
 Route::post('/forgotPassword', [App\Http\Controllers\api\AuthController::class, 'forgotPassword']);
 Route::post('/updatePassword', [App\Http\Controllers\api\AuthController::class, 'updatePassword']);
 Route::get('/fileGet', [App\Http\Controllers\api\SubjectController::class, 'fileGet']);
-Route::get('/dependencies', [App\Http\Controllers\api\SubjectController::class, 'dependencies']);
 Route::post('/addFile', [App\Http\Controllers\api\SubjectController::class, 'addFile']);
 Route::put('/update/profile/{id}', [App\Http\Controllers\api\AuthController::class, 'updateProfile']);
 Route::get('/getOneTeacher/{id}',[App\Http\Controllers\api\AuthController::class,'getOneTeacher']);
-Route::get('AllUser',[App\Http\Controllers\api\AuthController::class,'AllUser']);
+Route::post('/resendEmail',[App\Http\Controllers\api\AuthController::class,'resendEmail']);
 
 
 Route::apiResource('subjects', App\Http\Controllers\api\SubjectController::class);
@@ -73,6 +72,9 @@ Route::get('/allSearch', [App\Http\Controllers\api\CourceController::class, 'all
 Route::apiResource('dacuments', App\Http\Controllers\api\DacumentController::class);
 Route::post('/dacumentsUpdate/{id}', [App\Http\Controllers\api\DacumentController::class, 'update']);
 
+Route::get('/dependenciesAll', [App\Http\Controllers\api\SubjectController::class, 'dependenciesAll']);
+
+
                //blogs  
 
 Route::post('addBlog',[App\Http\Controllers\api\AdminAuthController::class,'addBlog']);
@@ -81,16 +83,19 @@ Route::get('blogGet/{id}',[App\Http\Controllers\api\AdminAuthController::class,'
 Route::delete('blogDestroy/{id}',[App\Http\Controllers\api\AdminAuthController::class,'blogDestroy']);
 Route::post('blogUpdate/{id}',[App\Http\Controllers\api\AdminAuthController::class,'update']);
 Route::post('/otp/verify', [App\Http\Controllers\api\AuthController::class, 'otpVerification']);
+Route::apiResource('subject-skills', App\Http\Controllers\api\SubjectSkillsController::class);
 
 
 Route::middleware('auth:api')->group(function () {
 Route::post('/PasswordChanged ', [App\Http\Controllers\api\AuthController::class, 'PasswordChanged']);
 Route::post('/update/AdminProfile', [App\Http\Controllers\api\AdminAuthController::class, 'adminProfile']);
 Route::get('/logout',[App\Http\Controllers\api\AuthController::class,'logout']);
+Route::get('AllUser',[App\Http\Controllers\api\MessageController::class,'AllUser']);
 
 Route::get('/status/{id}',[App\Http\Controllers\api\AuthController::class,'status']);
 Route::delete('/delete/{id}',[App\Http\Controllers\api\AuthController::class,'delete']);
 Route::get('/getTeacher',[App\Http\Controllers\api\AuthController::class,'getTeacher']);
+Route::get('/dependencies', [App\Http\Controllers\api\SubjectController::class, 'dependencies']);
 
        //     
 Route::delete('reviewDestroy/{id}',[App\Http\Controllers\api\AdminAuthController::class,'reviewDestroy']);
@@ -121,5 +126,8 @@ Route::get('/rating/{user}',[App\Http\Controllers\api\RatingController::class,'g
 Route::post('/sendMessage', [App\Http\Controllers\api\MessageController::class, 'sendMessage']);
 Route::post('chat', [App\Http\Controllers\api\MessageController::class, 'sendUserChat']);
 Route::post('messageShow', [App\Http\Controllers\api\MessageController::class, 'messageShow']);
+
+Route::post('stripePost', [App\Http\Controllers\api\PaymentController::class, 'stripePost']);
+
 
 });

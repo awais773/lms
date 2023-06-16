@@ -5,8 +5,11 @@ use App\Models\BanksPayment;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Stripe;
+
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use PhpParser\Node\Stmt\TryCatch;
 
 class PaymentController extends Controller
 {
@@ -130,5 +133,90 @@ class PaymentController extends Controller
         ], 200);
     }
 
+
+    // public function stripePost(Request $request)
+    // {
+    //     try {
+    //         $stripe = new \Stripe\StripeClient(
+    //             env('STRIPE_SECRET'));
+    //       $payment =  $stripe->tokens->create([
+    //           'card' => [
+    //             'number' => $request->number,
+    //             'exp_month' => $request->exp_month,
+    //             'exp_year' => $request->exp_year,
+    //             'cvc' => $request->cvc,
+    //           ],
+    //         ]);
+    //         Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
+    //        $response = $stripe->charges->create([
+    //           'amount' =>$request->amount,
+    //           'currency' => 'usd',
+    //           'source' => $request->$payment->id,
+    //           'description' => $request->description,
+    //         ]);            
+    //         return response([$response->status], 201);
+    //     } catch (\Exception $e) {
+    //         return response([
+    //             'success' => false,
+    //             $e->getMessage()
+    //         ], 400);
+    //     }
+    
+    //     return response([
+    //         'message' => 'Invalid Email or password.'
+    //     ], 401);
+    // }
+
+    public function stripePost(Request $request)
+{
+    try {
+        $stripe = new \Stripe\StripeClient(env('STRIPE_SECRET'));
+        $payment = $stripe->tokens->create([
+            'card' => [
+                'number' =>$request->number, // Test card number
+                'exp_month' => $request->exp_month,
+                'exp_year' => $request->exp_year,
+                'cvc' => $request->cvc,
+            ],
+        ]);
+        
+        \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
+        dd($payment->id);
+        $response = $stripe->charges->create([
+            'amount' => $request->amount,
+            'currency' => 'usd',
+            'source' => $payment->id, // Use the token ID from the test token
+            'description' => $request->description,
+        ]);
+        
+        return response([$response->status], 201);
+    } catch (\Exception $e) {
+        return response([
+            'success' => false,
+            $e->getMessage()
+        ], 400);
+    }
+
+    return response([
+        'message' => 'Invalid Email or password.'
+    ], 401);
+}
+
+
+// public function stripePost(Request $request)
+// {
+//     Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
+//     Stripe\Charge::create ([
+//             "amount" => 100*100,
+//             "currency" => "INR",
+//             "source" => $request->stripeToken,
+//             "description" => "This payment is testing purpose of techsolutionstuff",
+//     ]);
+
+       
+//     return response([
+//         'message' => 'success'
+//     ], 401);
+// }
 
 }

@@ -14,7 +14,7 @@ class CourceController extends Controller
    
     public function index()
     {
-        $courses = Cource::latest()->with('class:id,name','subject:id,name','teacher')->get();
+        $courses = Cource::latest()->with('class:id,name','teacher')->get();
         foreach ($courses as $course) {
             $course->location = json_decode($course->location); // Decode the JSON-encoded location string
         }
@@ -52,7 +52,7 @@ class CourceController extends Controller
         $Cource->details = $req->details;
         $Cource->expertise = $req->expertise;
         $Cource->class_id = $req->class_id;
-        $Cource->subject_id = $req->subject_id;
+        $Cource->subject = $req->subject;
         $Cource->location = json_encode($req->location); // Store location as JSON-encoded string
         $Cource->save();
     
@@ -74,7 +74,7 @@ class CourceController extends Controller
 
     public function show($id)
 {
-    $course = Cource::with('class:id,name','subject:id,name','teacher')->where('id',$id)->first();
+    $course = Cource::with('class:id,name','teacher')->where('id',$id)->first();
 
     if (is_null($course)) {
         return response()->json([
@@ -110,7 +110,7 @@ class CourceController extends Controller
         $video->details = $req->details;
         $video->expertise = $req->expertise;
         $video->class_id = $req->class_id;
-        $video->subject_id = $req->subject_id;
+        $video->subject = $req->subject;
         $video->location = $req->location;
         $video->save();
         return response()->json([
@@ -127,7 +127,7 @@ class CourceController extends Controller
         if (!empty($Cource)) {
             $Cource->delete();
             return response()->json([
-                'success' => true,
+                'success' => true, 
                 'message' => ' delete successfuly',
             ], 200);
         } else {
@@ -147,7 +147,7 @@ class CourceController extends Controller
                 'message' => 'user not found'
             ], 404);
         }
-        $courses = Cource::latest()->with('class:id,name','subject:id,name','teacher')->whereIn('user_id', [$user->id])->get();
+        $courses = Cource::latest()->with('class:id,name','teacher')->whereIn('user_id', [$user->id])->get();
         foreach ($courses as $course) {
             $course->location = json_decode($course->location); // Decode the JSON-encoded location string
         }

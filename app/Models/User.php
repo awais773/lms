@@ -17,7 +17,10 @@ class User extends Authenticatable
      *
      * @var array<int, string>
      */
+    // protected $primaryKey = 'id'; 
+    // public $incrementing = false; // Disable auto-incrementing
 
+    // protected $keyType = 'string';
      protected $guarded = [] ;
 
     // protected $fillable = [
@@ -68,4 +71,12 @@ class User extends Authenticatable
 {
     return $this->hasMany(Rating::class);
 }
+
+
+public function unseenMessages()
+{
+    return $this->hasMany(ChatMessage::class, 'user_id', 'id')
+        ->where('seen', false);
+}
+
 }
