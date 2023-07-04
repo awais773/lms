@@ -168,39 +168,35 @@ class PaymentController extends Controller
     // }
 
     public function stripePost(Request $request)
-{
-    try {
-        $stripe = new \Stripe\StripeClient(env('STRIPE_SECRET'));
-        $payment = $stripe->tokens->create([
-            'card' => [
-                'number' =>$request->number, // Test card number
-                'exp_month' => $request->exp_month,
-                'exp_year' => $request->exp_year,
-                'cvc' => $request->cvc,
-            ],
-        ]);
-        
-        \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
-        dd($payment->id);
-        $response = $stripe->charges->create([
-            'amount' => $request->amount,
-            'currency' => 'usd',
-            'source' => $payment->id, // Use the token ID from the test token
-            'description' => $request->description,
-        ]);
-        
-        return response([$response->status], 201);
-    } catch (\Exception $e) {
+    {
+        try {
+            \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
+    
+            $response = \Stripe\Charge::create([
+                'amount' => $request->amount,
+                'currency' => 'usd',
+                'source' => 'tok_visa', // Replace with the appropriate test card token
+                'description' => $request->description,
+            ]);
+    
+            return response([
+                'success' => true,
+                'message' => 'Payment Sucessfull',
+                'data'=> $response->status,
+            ], 201);
+        } catch (\Exception $e) {
+            return response([
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 400);
+        }
+    
         return response([
-            'success' => false,
-            $e->getMessage()
-        ], 400);
+            'message' => 'Invalid Email or password.'
+        ], 401);
     }
-
-    return response([
-        'message' => 'Invalid Email or password.'
-    ], 401);
-}
+    
+    
 
 
 // public function stripePost(Request $request)

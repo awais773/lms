@@ -91,7 +91,6 @@ class DacumentController extends Controller
     }
 
 
-
     public function update(Request $req, $id)
     {
         $video = CourseFile::find($id);
@@ -143,7 +142,7 @@ class DacumentController extends Controller
         ], 200);
     }
 
-   
+    
     public function destroy($id)
     {
         $Cource = CourseFile::find($id);

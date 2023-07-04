@@ -10,6 +10,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Laravel\Passport\Passport;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
 
@@ -37,9 +38,9 @@ class AuthController extends Controller
         }
         $randomId = rand(1000000, 9999999);
         $locations = $request->input('location');
-     $locationString = json_encode($locations); 
+       $locationString = json_encode($locations); 
         $user = User::create([
-            'id' => $randomId, // Assign the random ID
+            // 'id' => $randomId, // Assign the random ID
             'name' => $request->name,
             'last_name' => $request->last_name,
             'city' => $request->city,
@@ -51,17 +52,18 @@ class AuthController extends Controller
             'social_type' => $request->social_type,
             'password' => Hash::make($request->password)
         ]);
-       $email = 'https://besttutorforyou.com/verifytutor/' . $randomId;
+       $email = 'https://besttutorforyou.com/verifytutor/' . $user->id;
         Mail::to($request->input('email'))->send(new OtpVerificationMail($email));
         $token = $user->createToken('Token')->accessToken;
-        if (!$user) {
-            return response()->json(['success' => false, 'message' => 'somthing Wrong',], 422);
+        if (!$token) {
+            return response()->json(['success' => false, 'message' => 'Failed to generate token'], 422);
         }
         return response()->json([
             'success' => true,
             'message' => 'login successfull',
             'user' => $user,
             'token' => $token,
+            'user_id'=>$user->id
         ], 200);
     }
 
@@ -235,7 +237,6 @@ public function login(Request $request)
     {
         $obj = User::find($id);
         if ($obj) {
-            $token = $obj->createToken('Token')->accessToken;
             if (!empty($request->input('cover_image'))) {
                 $obj->cover_image = $request->input('cover_image');
             }
@@ -335,8 +336,7 @@ public function login(Request $request)
         return response()->json(['success' => $this->success, 'message' => $this->message, 
         
         'data' => $this->data,
-        'user_id' => $id  ?? null,
-        'token' => $token ?? null
+        
     
     ]);
     }

@@ -83,7 +83,9 @@ Route::get('blogGet/{id}',[App\Http\Controllers\api\AdminAuthController::class,'
 Route::delete('blogDestroy/{id}',[App\Http\Controllers\api\AdminAuthController::class,'blogDestroy']);
 Route::post('blogUpdate/{id}',[App\Http\Controllers\api\AdminAuthController::class,'update']);
 Route::post('/otp/verify', [App\Http\Controllers\api\AuthController::class, 'otpVerification']);
-Route::apiResource('subject-skills', App\Http\Controllers\api\SubjectSkillsController::class);
+Route::apiResource('offer', App\Http\Controllers\api\OfferController::class);
+Route::get('/offerGet/{id}', [App\Http\Controllers\api\OfferController::class, 'offerGet']);
+
 
 
 Route::middleware('auth:api')->group(function () {

@@ -53,6 +53,8 @@ class CourceController extends Controller
         $Cource->expertise = $req->expertise;
         $Cource->class_id = $req->class_id;
         $Cource->subject = $req->subject;
+        $Cource->image = $req->image;
+        $Cource->video = $req->video;
         $Cource->location = json_encode($req->location); // Store location as JSON-encoded string
         $Cource->save();
     
@@ -106,12 +108,35 @@ class CourceController extends Controller
                 'message' => $validator->errors()->toJson(),
             ], 400);
         }
-        $video->name = $req->name;
-        $video->details = $req->details;
-        $video->expertise = $req->expertise;
-        $video->class_id = $req->class_id;
-        $video->subject = $req->subject;
-        $video->location = $req->location;
+        if (!empty($req->input('image'))) {
+            $video->image = $req->input('image');
+        }
+
+        if (!empty($req->input('video'))) {
+            $video->video = $req->input('video');
+        }
+        
+        if (!empty($req->input('location'))) {
+            $video->location = $req->input('location');
+        } 
+        
+        if (!empty($req->input('subject'))) {
+            $video->subject = $req->input('subject');
+        } 
+        
+        if (!empty($req->input('class_id'))) {
+            $video->class_id = $req->input('class_id');
+        } 
+        
+        if (!empty($req->input('expertise'))) {
+            $video->expertise = $req->input('expertise');
+        }
+        if (!empty($req->input('details'))) {
+            $video->details = $req->input('details');
+        }
+        if (!empty($req->input('name'))) {
+            $video->name = $req->input('name');
+        }
         $video->save();
         return response()->json([
             'success' => true,
@@ -322,6 +347,9 @@ class CourceController extends Controller
             'courses' => $courses
         ]);
     }
+
+
+    
     
 
 }

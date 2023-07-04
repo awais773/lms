@@ -17,7 +17,8 @@ class User extends Authenticatable
      *
      * @var array<int, string>
      */
-    // protected $primaryKey = 'id'; 
+    protected $primaryKey = 'id'; 
+    
     // public $incrementing = false; // Disable auto-incrementing
 
     // protected $keyType = 'string';
