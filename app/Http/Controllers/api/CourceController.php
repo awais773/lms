@@ -267,34 +267,41 @@ class CourceController extends Controller
         if ($request->input('class_id')) {
             $query->where('class_id', $request->input('class_id'));
         }
-    
-        if ($request->input('subject_id')) {
-            $query->where('subject_id', $request->input('subject_id'));
-        }
-    
+
+
         if ($request->input('teacher_id')) {
             $query->whereHas('teacher', function ($subquery) use ($request) {
                 $subquery->where('id', $request->input('teacher_id'));
             });
         }
-    
-        if ($request->input('location')) {
-            $query->where('location', 'LIKE', '%' . $request->input('location') . '%');
+        if ($request->has('location')) {
+            $locations = $request->input('location');
+            $query->where(function ($subquery) use ($locations) {
+                foreach ($locations as $location) {
+                    $subquery->orWhere('location', 'LIKE', '%' . $location . '%');
+                }
+            });
         }
-    
+
+        
         if ($request->input('name')) {
             $query->where('name', 'LIKE', '%' . $request->input('name') . '%');
         }
-    
-        if ($request->input('subject_name')) {
-            $query->whereHas('subject', function ($subquery) use ($request) {
-                $subquery->where('name', 'LIKE', '%' . $request->input('subject_name') . '%');
-            });
+
+        if ($request->input('subject')) {
+            $query->where('subject', 'LIKE', '%' . $request->input('subject') . '%');
         }
+    
     
         if ($request->input('teacher_price')) {
             $query->whereHas('teacher', function ($subquery) use ($request) {
                 $subquery->where('price', $request->input('teacher_price'));
+            });
+        }
+
+        if ($request->input('teacher_city')) {
+            $query->whereHas('teacher', function ($subquery) use ($request) {
+                $subquery->where('city', $request->input('teacher_city'));
             });
         }
         if ($request->input('teacher_volunteer')) {
@@ -328,25 +335,56 @@ class CourceController extends Controller
         ]);
     }
 
+    // public function allSearch(Request $request)
+    // {
+    //     $query = $request->input('query');
+    //     $users = User::where('name', 'LIKE', "%$query%")->select('id','name','last_name')->get();
+    //     $courses = Cource::where('name', 'LIKE', "%$query%")
+    //                     ->orWhereHas('subject', function ($subQuery) use ($query) {
+    //                         $subQuery->where('name', 'LIKE', "%$query%");
+    //                     })
+    //                     ->orWhereHas('class', function ($subQuery) use ($query) {
+    //                         $subQuery->where('name', 'LIKE', "%$query%");
+    //                     })
+    //                     ->select('id','name','subject_id','class_id')->get();
+    //     return response()->json([
+    //         'success' => true,
+    //         'users' => $users,
+    //         'courses' => $courses
+    //     ]);
+    // }
 
     public function allSearch(Request $request)
     {
         $query = $request->input('query');
         $users = User::where('name', 'LIKE', "%$query%")->select('id','name','last_name')->get();
         $courses = Cource::where('name', 'LIKE', "%$query%")
-                        ->orWhereHas('subject', function ($subQuery) use ($query) {
-                            $subQuery->where('name', 'LIKE', "%$query%");
-                        })
                         ->orWhereHas('class', function ($subQuery) use ($query) {
                             $subQuery->where('name', 'LIKE', "%$query%");
                         })
-                        ->select('id','name','subject_id','class_id')->get();
+                        ->select('id','name','class_id')->get();
         return response()->json([
             'success' => true,
             'users' => $users,
             'courses' => $courses
         ]);
     }
+
+
+    public function getUserPriceRange()
+{
+    $maxPrice = User::max('price');
+    $minPrice = User::min('price');
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Data susccessfull',
+        'data' => [
+            'max_price' => $maxPrice,
+            'min_price' => $minPrice
+        ],
+    ]);
+}
 
 
     

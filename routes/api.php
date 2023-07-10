@@ -67,6 +67,7 @@ Route::post('/couresUpdate/{id}', [App\Http\Controllers\api\ResourseController::
 Route::get('/indexgetTeacher/{id}', [App\Http\Controllers\api\CourceController::class, 'indexgetTeacher']);
 Route::post('/filter_course', [App\Http\Controllers\api\CourceController::class, 'search']);
 Route::get('/allSearch', [App\Http\Controllers\api\CourceController::class, 'allSearch']);
+Route::get('/getUserPriceRange', [App\Http\Controllers\api\CourceController::class, 'getUserPriceRange']);
 
 
 Route::apiResource('dacuments', App\Http\Controllers\api\DacumentController::class);
@@ -83,8 +84,13 @@ Route::get('blogGet/{id}',[App\Http\Controllers\api\AdminAuthController::class,'
 Route::delete('blogDestroy/{id}',[App\Http\Controllers\api\AdminAuthController::class,'blogDestroy']);
 Route::post('blogUpdate/{id}',[App\Http\Controllers\api\AdminAuthController::class,'update']);
 Route::post('/otp/verify', [App\Http\Controllers\api\AuthController::class, 'otpVerification']);
-Route::apiResource('offer', App\Http\Controllers\api\OfferController::class);
 Route::get('/offerGet/{id}', [App\Http\Controllers\api\OfferController::class, 'offerGet']);
+
+        //// invoices
+
+Route::post('/offerStatus/{id}', [App\Http\Controllers\api\OfferController::class, 'invoice']);
+Route::get('/invoice', [App\Http\Controllers\api\OfferController::class, 'invoiceGet']);
+Route::get('/invoice/{id}', [App\Http\Controllers\api\OfferController::class, 'invoiceShow']);
 
 
 
@@ -128,8 +134,12 @@ Route::get('/rating/{user}',[App\Http\Controllers\api\RatingController::class,'g
 Route::post('/sendMessage', [App\Http\Controllers\api\MessageController::class, 'sendMessage']);
 Route::post('chat', [App\Http\Controllers\api\MessageController::class, 'sendUserChat']);
 Route::post('messageShow', [App\Http\Controllers\api\MessageController::class, 'messageShow']);
+Route::get('updateSeen', [App\Http\Controllers\api\MessageController::class, 'updateSeen']);
 
-Route::post('stripePost', [App\Http\Controllers\api\PaymentController::class, 'stripePost']);
+    ///  Offer
+
+Route::apiResource('offer', App\Http\Controllers\api\OfferController::class);
+
 
 
 });

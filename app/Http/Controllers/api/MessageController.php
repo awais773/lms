@@ -104,24 +104,7 @@ class MessageController extends Controller
     // }
 
 
-    // public function messageShow(Request $request)
-    // {
-    //     $recipient = $request->input('sender_id');
-    //     $user = $request->user(); // Assuming you have user authentication configured
-    //     $userChats = ChatMessage::where(function ($query) use ($user, $recipient) {
-    //         $query->where('user_id', $user->id)
-    //               ->where('sender_id', $recipient);
-    //     })->orWhere(function ($query) use ($user, $recipient) {
-    //         $query->where('user_id', $recipient)
-    //               ->where('sender_id', $user->id);
-    //     })->get();
-    
-    //     return response()->json([
-    //         'success' => true,
-    //         'data' => $userChats,
-    //     ], 200);
-    // }
-    
+
 
 
 
@@ -157,12 +140,14 @@ public function sendUserChat(Request $request)
     $message = $request->input('message');
     $recipient = $request->input('sender_id');
     $type = $request->input('type');
+    $offer = $request->input('offer');
     $user = $request->user(); // Assuming you have user authentication configured
     $chatMessage = ChatMessage::create([
         'user_id' => $user->id,
         'sender_id' => $recipient,
         'message' => $message,
         'type' => $type,
+        'offer' => $offer,
     ]);
 
     // Send the chat message to the recipient in real-time using Pusher
@@ -252,6 +237,11 @@ public function messageShow(Request $request)
             $message->save();
         });
 
+        $userChats->transform(function ($message) {
+            $message->offer = json_decode($message->offer);
+            return $message;
+        });
+
     return response()->json([
         'success' => true,
         'data' => $userChats,
@@ -261,14 +251,111 @@ public function messageShow(Request $request)
 
 
 
+// public function AllUser(Request $request)
+// {
+//     $user = $request->user();
+//     $users = User::select('id', 'name', 'last_name', 'image')
+//         ->withCount(['unseenMessages as unseen_message_count' => function ($query) use ($user) {
+//             $query->where('sender_id', $user->id)
+//                 ->where('seen', false);
+//         }])
+//         ->orderBy('unseen_message_count', 'desc')
+//         ->get();
+
+//     return response()->json([
+//         'success' => true,
+//         'message' => 'All Data successfully',
+//         'data' => $users,
+//     ], 200);
+// }
+
+// public function AllUser(Request $request)
+// {
+//     $user = $request->user();
+
+//     // Retrieve the IDs of users with whom the current user has chatted
+//     $chattedUserIds = ChatMessage::where('user_id', $user->id)
+//         ->orWhere('sender_id', $user->id)
+//         ->pluck('user_id', 'sender_id')
+//         ->flatten()
+//         ->unique();
+
+//     // Retrieve the users who have chatted with the current user
+//     $users = User::whereIn('id', $chattedUserIds)
+//         ->select('id', 'name', 'last_name', 'image')
+//         ->withCount(['unseenMessages as unseen_message_count' => function ($query) use ($user) {
+//             $query->where('sender_id', $user->id)
+//                 ->where('seen', false);
+//         }])
+//         ->orderBy('unseen_message_count', 'desc')
+//         ->get();
+
+//     return response()->json([
+//         'success' => true,
+//         'message' => 'All Data successfully',
+//         'data' => $users,
+//     ], 200);
+// }
+
+// public function AllUser(Request $request)
+// {
+//     $user = $request->user();
+
+//     // Retrieve the IDs of users who have sent messages to the current user
+//     $senderIds = ChatMessage::where('user_id', $user->id)
+//         ->pluck('sender_id')
+//         ->unique();
+
+//     // Retrieve the IDs of users who have received messages from the current user
+//     $recipientIds = ChatMessage::where('sender_id', $user->id)
+//         ->pluck('user_id')
+//         ->unique();
+
+//     // Combine both sender IDs and recipient IDs
+//     $chattedUserIds = $senderIds->concat($recipientIds)->unique();
+
+//     // Retrieve the users who have chatted with the current user
+//     $users = User::whereIn('id', $chattedUserIds)
+//         ->select('id', 'name', 'last_name', 'image')
+//         ->withCount(['unseenMessages as unseen_message_count' => function ($query) use ($user) {
+//             $query->where('sender_id', $user->id)
+//                 ->where('seen', false);
+//         }])
+//         ->orderBy('unseen_message_count', 'desc')
+//         ->get();
+
+//     return response()->json([
+//         'success' => true,
+//         'message' => 'All Data successfully',
+//         'data' => $users,
+//     ], 200);
+// }
+
 public function AllUser(Request $request)
 {
     $user = $request->user();
-    $users = User::select('id', 'name', 'last_name', 'image')
+
+    // Retrieve the IDs of users who have sent messages to the current user
+    $senderIds = ChatMessage::where('user_id', $user->id)
+        ->pluck('sender_id')
+        ->unique();
+
+    // Retrieve the IDs of users who have received messages from the current user
+    $recipientIds = ChatMessage::where('sender_id', $user->id)
+        ->pluck('user_id')
+        ->unique();
+
+    // Combine both sender IDs and recipient IDs
+    $chattedUserIds = $senderIds->concat($recipientIds)->unique();
+
+    // Retrieve the users who have chatted with the current user
+    $users = User::whereIn('id', $chattedUserIds)
+        ->select('id', 'name', 'last_name', 'image')
         ->withCount(['unseenMessages as unseen_message_count' => function ($query) use ($user) {
             $query->where('sender_id', $user->id)
                 ->where('seen', false);
         }])
+        ->orderByDesc('id', $user->id)
         ->orderBy('unseen_message_count', 'desc')
         ->get();
 
@@ -278,6 +365,29 @@ public function AllUser(Request $request)
         'data' => $users,
     ], 200);
 }
+
+
+
+
+public function updateSeen($id)
+{
+    $course = ChatMessage::where('id', $id)->first();
+    if (is_null($course)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Course not found'
+        ], 404);
+    }
+    // Update the 'seen' column to true
+    $course->seen = true;
+    $course->save();
+
+    return response()->json([
+        'success' => true,
+    ], 200);
+}
+
+
 
 
 

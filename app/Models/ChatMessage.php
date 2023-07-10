@@ -11,7 +11,11 @@ class ChatMessage extends Model
     protected $fillable = [
         'message',
         'user_id',
-        'sender_id'
+        'sender_id',
+        'created_at',
+        'offer',
+        'type',
+
     ];
 
     protected $attributes = [
