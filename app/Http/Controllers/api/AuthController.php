@@ -2,17 +2,19 @@
 
 namespace App\Http\Controllers\api;
 
+use Closure;
 use App\Models\User;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Laravel\Passport\Passport;
 use App\Mail\OtpVerificationMail;
 use App\Mail\OtpVerificationMails;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use Laravel\Passport\Passport;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
@@ -52,7 +54,7 @@ class AuthController extends Controller
             'social_type' => $request->social_type,
             'password' => Hash::make($request->password)
         ]);
-       $email = 'https://besttutorforyou.com/verifytutor/' . $user->id;
+       $email = 'https://besttutorforyou.com/Login?type=verified';
         Mail::to($request->input('email'))->send(new OtpVerificationMail($email));
         $token = $user->createToken('Token')->accessToken;
         if (!$token) {
@@ -159,8 +161,29 @@ public function login(Request $request)
     }
 }
 
+  public function newlogin(Request $request)
+    {
+        $credentials = $request->only('id', 'password');
+        if (Auth::attempt($credentials)) {
+            // Authentication successful
+            $user = auth()->user();
+            $token = $user->createToken('Token')->accessToken;
+            $user->skills = json_decode($user->skills); // Decode the JSON-encoded skills property
 
-
+            return response()->json([
+                'success' => true,
+                'message' => 'Login successful',
+                'user' => $user,
+                'token' => $token,
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'error' => 'Unauthorized',
+                'message' => 'Invalid ID or password',
+            ]);
+        }
+    }
 
 
    
@@ -233,10 +256,11 @@ public function login(Request $request)
     }
 
 
-   public function updateProfile(Request $request, $id)
+   public function updateProfile(Request $request,)
     {
-        $obj = User::find($id);
-        if ($obj) {
+        $id = $request->user()->id;
+        $obj = User::find($id);       
+         if ($obj) {
             if (!empty($request->input('cover_image'))) {
                 $obj->cover_image = $request->input('cover_image');
             }
@@ -511,6 +535,39 @@ public function login(Request $request)
                     'message' => 'Email sent successfully',
                 ]);
             }
+
+
+
+            public function handle(Request $request)
+            {
+                $token = $request->header('Authorization');
+                if (!$token) {
+                    return response()->json([
+                        'success' => false,
+                        'error' => 'Unauthorized'
+                    ], 401);
+                }
+            
+                // Extract the token from the header (remove 'Bearer ' prefix)
+                $token = str_replace('Bearer ', '', $token);
+            
+                // Check if the token is valid
+                // $user = User::where('api_token', $token)
+                $user = Auth::guard('api')->user();
+                if (!$user) {
+                    return response()->json(['error' => 'Invalid token'], 401);
+                }
+                return response()->json([
+                    'success' => true,
+                    'message' => 'valid token',
+                  ]);
+            }
+            
+                
+
+
+
+
        
     }
 

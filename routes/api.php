@@ -28,6 +28,7 @@ Route::get('auth/callback',[App\Http\Controllers\api\AuthController::class,'hand
    // admin //
 
 Route::post('adminRegister',[App\Http\Controllers\api\AdminAuthController::class,'adminRegister']);
+Route::delete('deleteUsers',[App\Http\Controllers\api\AdminAuthController::class,'deleteUser']);
 Route::post('adminlogin',[App\Http\Controllers\api\AdminAuthController::class,'adminlogin']);
 Route::get('dashboard',[App\Http\Controllers\api\AdminAuthController::class,'dashboard']);
 
@@ -44,11 +45,11 @@ Route::get('/student',[App\Http\Controllers\api\AuthController::class,'student']
 Route::post('register',[App\Http\Controllers\api\AuthController::class,'register']);
 Route::post('registers',[App\Http\Controllers\api\AuthController::class,'registers']);
 Route::post('login',[App\Http\Controllers\api\AuthController::class,'login']);
+Route::post('newlogin',[App\Http\Controllers\api\AuthController::class,'newlogin']);
 Route::post('/forgotPassword', [App\Http\Controllers\api\AuthController::class, 'forgotPassword']);
 Route::post('/updatePassword', [App\Http\Controllers\api\AuthController::class, 'updatePassword']);
 Route::get('/fileGet', [App\Http\Controllers\api\SubjectController::class, 'fileGet']);
 Route::post('/addFile', [App\Http\Controllers\api\SubjectController::class, 'addFile']);
-Route::put('/update/profile/{id}', [App\Http\Controllers\api\AuthController::class, 'updateProfile']);
 Route::get('/getOneTeacher/{id}',[App\Http\Controllers\api\AuthController::class,'getOneTeacher']);
 Route::post('/resendEmail',[App\Http\Controllers\api\AuthController::class,'resendEmail']);
 
@@ -92,6 +93,10 @@ Route::post('/offerStatus/{id}', [App\Http\Controllers\api\OfferController::clas
 Route::get('/invoice', [App\Http\Controllers\api\OfferController::class, 'invoiceGet']);
 Route::get('/invoice/{id}', [App\Http\Controllers\api\OfferController::class, 'invoiceShow']);
 
+    ///  contact
+Route::apiResource('contacts', App\Http\Controllers\api\ContactController::class);
+
+
 
 
 Route::middleware('auth:api')->group(function () {
@@ -99,6 +104,9 @@ Route::post('/PasswordChanged ', [App\Http\Controllers\api\AuthController::class
 Route::post('/update/AdminProfile', [App\Http\Controllers\api\AdminAuthController::class, 'adminProfile']);
 Route::get('/logout',[App\Http\Controllers\api\AuthController::class,'logout']);
 Route::get('AllUser',[App\Http\Controllers\api\MessageController::class,'AllUser']);
+Route::put('/update/profile', [App\Http\Controllers\api\AuthController::class, 'updateProfile']);
+Route::post('/handle', [App\Http\Controllers\api\AuthController::class, 'handle']);
+
 
 Route::get('/status/{id}',[App\Http\Controllers\api\AuthController::class,'status']);
 Route::delete('/delete/{id}',[App\Http\Controllers\api\AuthController::class,'delete']);
@@ -114,7 +122,6 @@ Route::get('ReviewGet',[App\Http\Controllers\api\AdminAuthController::class,'Rev
 Route::apiResource('packages', App\Http\Controllers\api\PackageController::class);
 Route::apiResource('promotions', App\Http\Controllers\api\PromotionController::class);
 Route::apiResource('subjects', App\Http\Controllers\api\SubjectController::class);
-Route::apiResource('contacts', App\Http\Controllers\api\ContactController::class);
 Route::apiResource('services', App\Http\Controllers\api\ServiceController::class);
 Route::apiResource('ads', App\Http\Controllers\api\AdsController::class);
 Route::apiResource('roles', App\Http\Controllers\api\RoleController::class);

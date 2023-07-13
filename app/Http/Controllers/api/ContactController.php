@@ -4,7 +4,10 @@ namespace App\Http\Controllers\api;
 
 use App\Models\Contact;
 use Illuminate\Http\Request;
+use App\Mail\MailContact;
+use App\Mail\MailContacts;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 
 class ContactController extends Controller
@@ -47,32 +50,9 @@ class ContactController extends Controller
         $Contact->email = $req->email;
         $Contact->subject = $req->subject;
         $Contact->save();
-
-        if ($files = $req->file('image')) {
-            foreach ($files as $file) {
-                $image_name = md5(rand(1000, 10000));
-                $ext = strtolower($file->getClientOriginalExtension());
-                $image_full_name = $image_name . '.' . $ext;
-                $upload_path = 'packagePicture/';
-                $image_url = $upload_path . $image_full_name;
-                $file->move($upload_path, $upload_path . $image_full_name);
-                $image = $image_url;
-
-                // $productImage = new SocietyPicture();
-                // $productImage->image = $image;
-                // $productImage->dealer_add_society_id = $Cource->id;
-                // $productImage->save();
-            }
-
-            //    $fltnos  = $req->input('add_society_id');
-            //     foreach($fltnos as $key => $fltno) {
-            //         $modelName = new PlotSize();
-            //         $modelName->add_society_id = $fltno;
-            //         $modelName->dealer_add_socity_id = $rating->id;
-            //         $modelName->save();
-            //     }
-
-        }
+        Mail::to('support@tutorsuperb.co.uk')->send(new MailContact($req->subject, $req->message));
+        $email = 'Thank You';
+        Mail::to($req->input('email'))->send(new MailContacts($email));
         if (is_null($Contact)) {
             return response()->json([
                 'success' => false,

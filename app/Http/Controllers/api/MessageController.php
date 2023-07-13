@@ -330,41 +330,49 @@ public function messageShow(Request $request)
 //         'data' => $users,
 //     ], 200);
 // }
-
 public function AllUser(Request $request)
 {
     $user = $request->user();
 
-    // Retrieve the IDs of users who have sent messages to the current user
-    $senderIds = ChatMessage::where('user_id', $user->id)
-        ->pluck('sender_id')
-        ->unique();
-
-    // Retrieve the IDs of users who have received messages from the current user
-    $recipientIds = ChatMessage::where('sender_id', $user->id)
+    // Retrieve the IDs of users who have sent messages to or received messages from the current user
+    $chattedUserIds = ChatMessage::where('user_id', $user->id)
+        ->orWhere('sender_id', $user->id)
         ->pluck('user_id')
+        ->concat(ChatMessage::where('user_id', $user->id)
+            ->orWhere('sender_id', $user->id)
+            ->pluck('sender_id'))
         ->unique();
 
-    // Combine both sender IDs and recipient IDs
-    $chattedUserIds = $senderIds->concat($recipientIds)->unique();
-
-    // Retrieve the users who have chatted with the current user
+    // Retrieve the users who have chatted with the current user (excluding the current user)
     $users = User::whereIn('id', $chattedUserIds)
+        ->where('id', '!=', $user->id)
         ->select('id', 'name', 'last_name', 'image')
         ->withCount(['unseenMessages as unseen_message_count' => function ($query) use ($user) {
             $query->where('sender_id', $user->id)
                 ->where('seen', false);
         }])
-        ->orderByDesc('id', $user->id)
+        ->orderByDesc(function ($query) use ($user) {
+            $query->select('created_at')
+                ->from('chat_messages')
+                ->whereColumn('users.id', 'chat_messages.user_id')
+                ->orWhereColumn('users.id', 'chat_messages.sender_id')
+                ->orderBy('created_at', 'desc')
+                ->limit(1);
+        })
         ->orderBy('unseen_message_count', 'desc')
         ->get();
 
     return response()->json([
         'success' => true,
-        'message' => 'All Data successfully',
+        'message' => 'User list retrieved successfully',
         'data' => $users,
     ], 200);
 }
+
+
+
+
+
 
 
 
