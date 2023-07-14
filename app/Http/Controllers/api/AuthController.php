@@ -118,17 +118,13 @@ public function login(Request $request)
         'type' => $request->type,
     ];
 
-    $socialCredentials = [
-        'email' => $request->email,
-        'type' => $request->type,
-        'social_type' => $request->social_type,
-    ];
-
     $user = User::where('email', $request->email)
                  ->where('type', $request->type)
                  ->first();
 
-    if ($user && $user->social_type === 'google') {
+    // if ($user && $user->social_type === 'google') {
+    if ($user && ($user->social_type === 'both' || $user->social_type === 'google')) {
+
         // Login using social_type 'google'
         // Perform any additional checks or validation specific to 'google'
         $token = $user->createToken('Token')->accessToken;
@@ -372,18 +368,25 @@ public function login(Request $request)
             'password' => 'required|min:6',
             'confirm_password' => 'required|same:password'
         ]);
+    
         $user = User::where('email', $request->email)->where('otp_verify', 1)->first();
-        // $user = User::where('email', $email)->where('otp_verify', 1)->first();
-
+    
         if ($user) {
-            // $user['is_verified'] = 0;
-            // $user['token'] = '';
-            $user['password'] = Hash::make($request->password);
+            if ($user->social_type === 'google') {
+                $user->social_type = 'both';
+            } elseif ($user->social_type === null) {
+                $user->social_type = null;
+            }
+    
+            $user->password = Hash::make($request->password);
             $user->save();
-            return response()->json(['success' => 'True', 'message' => 'Success! password has been changed',]);
+    
+            return response()->json(['success' => true, 'message' => 'Success! Password has been changed']);
         }
-        return response()->json(['success' => false, 'message' => 'Failed! something went wrong',]);
+    
+        return response()->json(['success' => false, 'message' => 'Failed! Something went wrong']);
     }
+    
     
     
       public function PasswordChanged(Request $request)
