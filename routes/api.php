@@ -68,7 +68,7 @@ Route::post('/couresUpdate/{id}', [App\Http\Controllers\api\ResourseController::
 Route::get('/indexgetTeacher/{id}', [App\Http\Controllers\api\CourceController::class, 'indexgetTeacher']);
 Route::post('/filter_course', [App\Http\Controllers\api\CourceController::class, 'search']);
 Route::get('/allSearch', [App\Http\Controllers\api\CourceController::class, 'allSearch']);
-Route::get('/getUserPriceRange', [App\Http\Controllers\api\CourceController::class, 'getUserPriceRange']);
+Route::get('/gernalSearch', [App\Http\Controllers\api\CourceController::class, 'GernalSearch']);
 
 
 Route::apiResource('dacuments', App\Http\Controllers\api\DacumentController::class);

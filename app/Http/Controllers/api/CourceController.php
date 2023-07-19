@@ -32,8 +32,6 @@ class CourceController extends Controller
             'data' => $courses,
         ]);
     }
-
-
     public function store(Request $req)
     {
         $validator = Validator::make($req->all(), [
@@ -59,7 +57,6 @@ class CourceController extends Controller
         $Cource->video = $req->video;
         $Cource->location = json_encode($req->location); // Store location as JSON-encoded string
         $Cource->save();
-
         if (is_null($Cource)) {
             return response()->json([
                 'success' => false,
@@ -365,7 +362,6 @@ class CourceController extends Controller
                 $subQuery->where('name', 'LIKE', "%$query%");
             })
             ->select('id', 'name', 'class_id')->get();
-
         $Subject = Subject::latest()->select('id', 'name')->get();
         if (is_null($Subject)) {
             return response()->json([
@@ -381,7 +377,7 @@ class CourceController extends Controller
                 'message' => 'Cource not found',
             ]);
         }
-        $maxPrice = User::max('price');
+        $maxPrice = User::max('price'); 
         $minPrice = User::min('price');
         return response()->json([
             'success' => true,
@@ -397,18 +393,20 @@ class CourceController extends Controller
     }
 
 
-    public function getUserPriceRange()
+    public function GernalSearch(Request $request)
     {
-        $maxPrice = User::max('price');
-        $minPrice = User::min('price');
-
+        $query = $request->input('query');
+        $users = User::where('name', 'LIKE', "%$query%")->select('id', 'name', 'last_name','image')->get();
+        $courses = Cource::where('name', 'LIKE', "%$query%")
+            ->orWhereHas('class', function ($subQuery) use ($query) {
+                $subQuery->where('name', 'LIKE', "%$query%");
+            })
+            ->select('id', 'name', 'class_id','image')->get();
         return response()->json([
             'success' => true,
-            'message' => 'Data susccessfull',
-            'data' => [
-                'max_price' => $maxPrice,
-                'min_price' => $minPrice
-            ],
+            'users' => $users,
+            'courses' => $courses,
         ]);
     }
+
 }

@@ -80,4 +80,11 @@ public function unseenMessages()
         ->where('seen', false);
 }
 
+
+public function cources()
+{
+    return $this->hasMany(Cource::class);
+}   
+
+
 }

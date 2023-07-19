@@ -413,7 +413,7 @@ public function login(Request $request)
 
     public function instructor()
     {
-        $data = User::with('role')->where('type','1')->get();
+        $data = User::with('qualification','cources.class:id,name')->where('type','1')->get();
         if (is_null($data)) {
             return response()->json('data not found');
         }
@@ -423,6 +423,39 @@ public function login(Request $request)
             'data' => $data,
         ]);
     }
+    
+    // public function instructor()
+    // {
+    //     $users = User::with(['qualification', 'cources.class'])
+    //         ->where('type', '1')
+    //         ->get();
+    
+    //     if ($users->isEmpty()) {
+    //         return response()->json('Data not found');
+    //     }
+    
+    //     $userData = [];
+    //     foreach ($users as $user) {
+    //         $classData = [];
+    //         foreach ($user->cources as $cource) {
+    //             $classData[] = [
+    //                 'class_id' => $cource->class->id,
+    //                 'class_name' => $cource->class->name,
+    //             ];
+    //         }
+    
+    //         $userData[] = [
+    //             'user_id' => $user->id,
+    //             'class_data' => $classData,
+    //         ];
+    //     }
+    
+    //     return response()->json([
+    //         'success' => true,
+    //         'message' => 'All data retrieved successfully',
+    //         'data' => $userData,
+    //     ]);
+    // }
 
     public function student()
     {
@@ -453,7 +486,6 @@ public function login(Request $request)
             ]);
         }
     }
-
 
          public function status($id)
           {
