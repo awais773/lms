@@ -6,7 +6,6 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Stripe;
-
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use PhpParser\Node\Stmt\TryCatch;
@@ -167,35 +166,62 @@ class PaymentController extends Controller
     //     ], 401);
     // }
 
+        // public function stripePost(Request $request)
+        // {
+        //     try {
+        //         \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
+        
+        //         $response = \Stripe\Charge::create([
+        //             'amount' => $request->amount,
+        //             'currency' => 'usd',
+        //             'source' => 'tok_visa', // Replace with the appropriate test card token
+        //             'description' => $request->description,
+        //         ]);
+        
+        //         return response([
+        //             'success' => true,
+        //             'message' => 'Payment Sucessfull',
+        //             'data'=> $response->status,
+        //         ], 201);
+        //     } catch (\Exception $e) {
+        //         return response([
+        //             'success' => false,
+        //             'error' => $e->getMessage()
+        //         ], 400);
+        //     }
+        
+        //     return response([
+        //         'message' => 'Invalid Email or password.'
+        //     ], 401);
+        // }
+
+
+
     public function stripePost(Request $request)
-    {
-        try {
-            \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
-    
-            $response = \Stripe\Charge::create([
-                'amount' => $request->amount,
-                'currency' => 'usd',
-                'source' => 'tok_visa', // Replace with the appropriate test card token
-                'description' => $request->description,
-            ]);
-    
-            return response([
-                'success' => true,
-                'message' => 'Payment Sucessfull',
-                'data'=> $response->status,
-            ], 201);
-        } catch (\Exception $e) {
-            return response([
-                'success' => false,
-                'error' => $e->getMessage()
-            ], 400);
-        }
-    
+{
+    try {
+        // Set Stripe API secret key
+        \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
+
+        $intent = \Stripe\PaymentIntent::create([
+        'amount' => $request->amount,
+        'currency' => 'usd',
+          ]);
+        // Return success response if the charge was successful
         return response([
-            'message' => 'Invalid Email or password.'
-        ], 401);
+            'success' => true,
+            'message' => 'Payment Successful',
+              'data' => $intent->client_secret,
+        ], 201);
+    } catch (\Exception $e) {
+        // Return error response if an exception occurs during payment processing
+        return response([
+            'success' => false,
+            'error' => $e->getMessage()
+        ], 400);
     }
-    
+}
+
     
 
 
@@ -216,3 +242,6 @@ class PaymentController extends Controller
 // }
 
 }
+
+
+

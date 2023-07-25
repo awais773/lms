@@ -121,14 +121,13 @@ public function login(Request $request)
     $user = User::where('email', $request->email)
                  ->where('type', $request->type)
                  ->first();
-
-    // if ($user && $user->social_type === 'google') {
     if ($user && ($user->social_type === 'both' || $user->social_type === 'google')) {
-
-        // Login using social_type 'google'
-        // Perform any additional checks or validation specific to 'google'
         $token = $user->createToken('Token')->accessToken;
         $user->skills = json_decode($user->skills); // Decode the JSON-encoded skills property
+        if ($request->has('isVerify')) {
+            $user->isVerify = $request->input('isVerify');
+        }
+        $user->save();
 
         return response()->json([
             'success' => true,
@@ -137,10 +136,13 @@ public function login(Request $request)
             'token' => $token,
         ], 200);
     } elseif (auth()->attempt($credentials)) {
-        // Login using email, password, and type
         $user = auth()->user();
         $token = $user->createToken('Token')->accessToken;
         $user->skills = json_decode($user->skills); // Decode the JSON-encoded skills property
+        if ($request->has('isVerify')) {
+            $user->isVerify = $request->input('isVerify');
+        }
+        $user->save();
 
         return response()->json([
             'success' => true,

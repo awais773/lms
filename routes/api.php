@@ -147,6 +147,16 @@ Route::get('updateSeen', [App\Http\Controllers\api\MessageController::class, 'up
 
 Route::apiResource('offer', App\Http\Controllers\api\OfferController::class);
 
+      /// strip
+Route::post('stripePost', [App\Http\Controllers\api\PaymentController::class, 'stripePost']);
+
+
+        //// invoices
+
+Route::post('/offerStatus/{id}', [App\Http\Controllers\api\OfferController::class, 'invoice']);
+Route::get('/invoice', [App\Http\Controllers\api\OfferController::class, 'invoiceGet']);
+Route::get('/invoice/{id}', [App\Http\Controllers\api\OfferController::class, 'invoiceShow']);
+
 
 
 });

@@ -396,17 +396,21 @@ class CourceController extends Controller
     public function GernalSearch(Request $request)
     {
         $query = $request->input('query');
-        $users = User::where('name', 'LIKE', "%$query%")->select('id', 'name', 'last_name','image')->get();
+        $users = User::where('name', 'LIKE', "%$query%")->select('id', 'name', 'last_name', 'image')->get();
         $courses = Cource::where('name', 'LIKE', "%$query%")
-            ->orWhereHas('class', function ($subQuery) use ($query) {
+            ->orWhereHas('Class', function ($subQuery) use ($query) {
                 $subQuery->where('name', 'LIKE', "%$query%");
             })
-            ->select('id', 'name', 'class_id','image')->get();
+            ->with('Class:id,name') // Eager load the class relationship
+            ->select('id', 'name', 'class_id', 'image')
+            ->get();
+    
         return response()->json([
             'success' => true,
             'users' => $users,
             'courses' => $courses,
         ]);
     }
+    
 
 }
