@@ -6,6 +6,7 @@ use Closure;
 use App\Models\User;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use App\Mail\TutorSuperbMail;
 use Laravel\Passport\Passport;
 use App\Mail\OtpVerificationMail;
 use App\Mail\OtpVerificationMails;
@@ -52,6 +53,7 @@ class AuthController extends Controller
             'location' => $locationString, // Store locations as a string
             'type' => $request->type,
             'social_type' => $request->social_type,
+            'isVerify' => 'false',
             'password' => Hash::make($request->password)
         ]);
        $email = 'https://besttutorforyou.com/Login?type=verified';
@@ -124,9 +126,19 @@ public function login(Request $request)
     if ($user && ($user->social_type === 'both' || $user->social_type === 'google')) {
         $token = $user->createToken('Token')->accessToken;
         $user->skills = json_decode($user->skills); // Decode the JSON-encoded skills property
+        // if ($request->has('isVerify')) {
+        //     $user->isVerify = $request->input('isVerify');
+        // }
+        // $user->save();
         if ($request->has('isVerify')) {
-            $user->isVerify = $request->input('isVerify');
-        }
+            $isVerify = $request->input('isVerify');
+            if ($isVerify === "true") {
+                $user->isVerify = 'true';
+                Mail::to($user->email)->send(new TutorSuperbMail($user));
+            } else {
+                // $user->isVerify = false;
+            }
+        }       
         $user->save();
 
         return response()->json([
@@ -140,8 +152,14 @@ public function login(Request $request)
         $token = $user->createToken('Token')->accessToken;
         $user->skills = json_decode($user->skills); // Decode the JSON-encoded skills property
         if ($request->has('isVerify')) {
-            $user->isVerify = $request->input('isVerify');
-        }
+            $isVerify = $request->input('isVerify');
+            if ($isVerify === "true") {
+                $user->isVerify = true;
+                Mail::to($user->email)->send(new TutorSuperbMail($user));
+            } else {
+                // $user->isVerify = false;
+            }
+        }       
         $user->save();
 
         return response()->json([
