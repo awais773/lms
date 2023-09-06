@@ -211,7 +211,8 @@ class PaymentController extends Controller
         return response([
             'success' => true,
             'message' => 'Payment Successful',
-              'data' => $intent->client_secret,
+            'data' => $intent->client_secret,
+            // 'data' => $intent->id
         ], 201);
     } catch (\Exception $e) {
         // Return error response if an exception occurs during payment processing

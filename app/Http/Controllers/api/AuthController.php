@@ -53,6 +53,7 @@ class AuthController extends Controller
             'location' => $locationString, // Store locations as a string
             'type' => $request->type,
             'social_type' => $request->social_type,
+            'volunteer' => $request->volunteer,
             'isVerify' => 'false',
             'password' => Hash::make($request->password)
         ]);

@@ -7,6 +7,7 @@ use App\Models\Cource;
 use App\Models\Subject;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use Illuminate\Support\Facades\Auth;
 use PHPUnit\Framework\Constraint\Count;
 use Illuminate\Support\Facades\Validator;
@@ -361,6 +362,7 @@ class CourceController extends Controller
             ->orWhereHas('class', function ($subQuery) use ($query) {
                 $subQuery->where('name', 'LIKE', "%$query%");
             })
+            ->with('Class:id,name') // Eager load the class relationship
             ->select('id', 'name', 'class_id')->get();
         $Subject = Subject::latest()->select('id', 'name')->get();
         if (is_null($Subject)) {
@@ -379,11 +381,13 @@ class CourceController extends Controller
         }
         $maxPrice = User::max('price'); 
         $minPrice = User::min('price');
+        $class = Category::select('id','name')->get();
         return response()->json([
             'success' => true,
             'users' => $users,
             'courses' => $courses,
             'Subject' => $Subject,
+            'class'  =>$class,
             'CounceCount' => $CounceCount,
             'price_range' => [
                 'max_price' => $maxPrice,

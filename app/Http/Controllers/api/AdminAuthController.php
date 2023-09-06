@@ -2,19 +2,20 @@
 
 namespace App\Http\Controllers\api;
 
+use Carbon\Carbon;
+use App\Models\Blog;
 use App\Models\User;
+use App\Models\Review;
 use App\Models\AdminUser;
+use App\Models\ChatMessage;
+use App\Models\Testimonial;
 use Illuminate\Http\Request;
 use App\Mail\OtpVerificationMail;
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
-use App\Models\Blog;
-use App\Models\Review;
-use App\Models\Testimonial;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 use Laravel\Passport\Guards\TokenGuard;
 use Illuminate\Support\Facades\Validator;
 
@@ -199,13 +200,25 @@ class AdminAuthController extends Controller
     // }
 
       public function dashboard(){
-         $user = User::where('role_id','1')->count();
-         $teacher = User::where('role_id','2')->count();
-         
-         $currentMonth = Carbon::now()->month;
-        $totalEarnings = DB::table('users')
+        $studentlatest = User::where('type', '2')
+        ->orderBy('created_at', 'desc') // Order by 'created_at' in descending order
+        ->take(10) // Limit to the latest 10 records
+        ->get();
+    
+       $teacherlatest = User::where('type', '1')
+        ->orderBy('created_at', 'desc') // Order by 'created_at' in descending order
+        ->take(10) // Limit to the latest 10 records
+        ->get();
+
+         $user = User::where('type','2')->count();
+         $teacher = User::where('type','1')->count();
+        $currentMonth = Carbon::now()->month;
+        $currentMonthTeacher = DB::table('users')
         ->whereMonth('created_at', '=', $currentMonth)
-         ->sum('receiving');
+         ->where('type','1')->count();
+         $currentMonthStudent = DB::table('users')
+         ->whereMonth('created_at', '=', $currentMonth)
+          ->where('type','2')->count();
          if (is_null($user & $teacher) ) {
             return response()->json([
                 'success' => false,
@@ -215,9 +228,12 @@ class AdminAuthController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'All Data susccessfull',
-            'student' => $user,
-            'teacher' => $teacher,
-            'totalEarnings' => $totalEarnings,
+            'total_student' => $user,
+            'total_teacher' => $teacher,
+            'currentMonthTeacher' => $currentMonthTeacher,
+            'currentMonthStudent' => $currentMonthStudent,
+            'student' => $studentlatest,
+            'teacher' => $teacherlatest,
         ],200);
     }
 
@@ -343,7 +359,6 @@ class AdminAuthController extends Controller
     public function reviewAdd(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            // 'name' => 'required|string|max:255',
         ]);
 
         if ($validator->fails()) {
@@ -352,14 +367,54 @@ class AdminAuthController extends Controller
         $user = Auth::guard('api')->user();
         $reviewAdd = new Review();
         $reviewAdd->review = $request->review;
+        $reviewAdd->ratting = $request->ratting;
+        $reviewAdd->status = $request->status;
         $reviewAdd->teacher_id = $request->teacher_id;
         $reviewAdd->student_id =$user->id;
         $reviewAdd->save();
+        if ($request->has('message_id')) {
+            $chatMessage = ChatMessage::find($request->message_id);
+            if ($chatMessage) {
+                $chatMessage->delete();
+            }
+        }
         return response()->json([
             'success' => true,
-            'message' => 'reviewAdd updated successfully.',
+            'message' => 'review Add successfully.',
             'data' => $reviewAdd,
         ],200);
+    }
+
+    public function reviewUpdate(Request $request, $id)
+    {
+        $obj = Review::find($id);
+         if ($obj) {
+            if (!empty($request->input('status'))) {
+                $obj->status = $request->input('status');
+            }
+            if (!empty($request->input('teacher_id'))) {
+                $obj->teacher_id = $request->input('teacher_id');
+            }
+
+            if (!empty($request->input('student_id'))) {
+                $obj->student_id = $request->input('student_id');
+            }
+
+            if (!empty($request->input('ratting'))) {
+                $obj->ratting = $request->input('ratting');
+            }
+
+            if (!empty($request->input('review'))) {
+                $obj->review = $request->input('review');
+            }
+             $obj->save();
+
+        }
+        return response()->json([
+            'success' => true,
+            'message' => 'review is updated successfully',
+            'data' => $obj,
+        ]);
     }
 
     public function reviewDestroy($id)
@@ -395,6 +450,72 @@ class AdminAuthController extends Controller
         ],200);
     }
 
+    public function ReviewshowId($id)
+    {
+        $Review = Review::with('teacher:id,name','student:id,name,image')->where('teacher_id' , $id)->get();
+        if (is_null($Review)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'data not found',
+            ]);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => 'All Data susccessfull',
+            'data' => $Review,
+        ],200);
+    }
+
+
+    public function ReviewStatus()
+    {
+        $Review = Review::with('teacher:id,name','student:id,name')->where('status','report')->get();
+        if (is_null($Review)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'data not found',
+            ]);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => 'All Data susccessfull',
+            'data' => $Review,
+        ],200);
+    }
+
+
+    public function ReviewGetTeacherAll()
+    {
+        $user = Auth::guard('api')->user();
+        $Review = Review::with('teacher:id,name','student:id,name')->where('teacher_id',$user->id)->get();
+        if (is_null($Review)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'data not found',
+            ]);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => 'All Data susccessfull',
+            'data' => $Review,
+        ],200);
+    }
+
+    public function ReviewGetTeacher($id)
+    {
+        $Review = Review::with('teacher:id,name','student:id,name')->find('techer_id', $id)->first();
+        if (is_null($Review)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'data not found',
+            ]);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => 'All Data susccessfull',
+            'data' => $Review,
+        ],200);
+    }
 
     public function Addtestimonial(Request $request)
     {

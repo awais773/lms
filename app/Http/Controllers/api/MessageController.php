@@ -333,7 +333,6 @@ public function messageShow(Request $request)
 public function AllUser(Request $request)
 {
     $user = $request->user();
-
     // Retrieve the IDs of users who have sent messages to or received messages from the current user
     $chattedUserIds = ChatMessage::where('user_id', $user->id)
         ->orWhere('sender_id', $user->id)

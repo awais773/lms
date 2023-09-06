@@ -31,95 +31,7 @@ class OfferController extends Controller
         ],200);
     }
 
-    // public function store(Request $req)
-    // {
-
-
-    //     $validator = Validator::make($req->all(), [
-    //         // 'title' => 'required|unique:dealer_add_societies',
-    //         // 'title' => 'required|unique:dealer_add_societies,title,NULL,id,user_id,' . auth()->id(),
-    //     ]);
-    //     if ($validator->fails()) {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'title already exists',
-    //         ], 400);
-    //     }    
-    //     $user = $req->user();
-    //     $Offer = new Offer();
-    //     $Offer->status = $req->status;
-    //     $Offer->offer_price = $req->offer_price;
-    //     $Offer->student_id =  $user->id;
-    //     $Offer->teacher_id = $req->teacher_id;
-    //     $Offer->description = $req->description;
-    //     $Offer->cource_id = $req->cource_id;
-    //     // Retrieve the course object based on the provided cource_id
-    //     $course = Cource::find($req->cource_id);
-    //     if (!$course) {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Course not found',
-    //         ], 404);
-    //     }
-
-    //     $Offer->courses()->associate($course); // Associate the course with the Offer
-    //     $offer = $Offer->save(); 
-    //     if (!$offer) {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Error storing Offer',
-    //         ], 400);
-    //     }   
-    //     $message = $req->input('message');
-    //     $recipient = $req->input('teacher_id');
-    //     $type = $req->input('type');
-    //     // $offer = $req->input('offer');
-    //     // Assuming you have user authentication configured
-    //     $chatMessage = ChatMessage::create([
-    //         'user_id' => $user->id,
-    //         'sender_id' => $recipient,
-    //         'message' => $message,
-    //         'type' => $type,
-    //         'offer' => $Offer, // Store the entire $Offer object
-    //     ]);
-    
-    //     // Send the chat message to the recipient in real-time using Pusher
-    //     $pusher = new Pusher(
-    //         config('broadcasting.connections.pusher.key'),
-    //         config('broadcasting.connections.pusher.secret'),
-    //         config('broadcasting.connections.pusher.app_id'),
-    //         [
-    //             'cluster' => config('broadcasting.connections.pusher.options.cluster'),
-    //             'useTLS' => true,
-    //         ]
-    //     );
-    
-    //     $pusher->trigger("chat-channel-{$recipient}", 'new-message', $chatMessage);
-    
-    //     // Mark previously unseen messages as seen
-    //     ChatMessage::where('user_id', $recipient)
-    //         ->where('sender_id', $user->id)
-    //         ->where('seen', false)
-    //         ->update(['seen' => true]);
-    
-    //     if (is_null($Offer)) {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'storage error'
-    //         ]);
-    //     }
-
-
-
-    
-    //     return response()->json([
-    //         'success' => true,
-    //         'message' => 'Add Offer created successfully',
-    //         'data' => $Offer,
-    //         // 'course' => $Offer->courses, // Access the associated course
-    //         'chat' => $chatMessage,
-    //     ], 200);
-    // }
+   
 
 
     public function store(Request $req)
@@ -160,18 +72,25 @@ class OfferController extends Controller
             'error' => $e->getMessage()
         ], 400);
     }
-
-    // The rest of your code...
     $user = $req->user();
+    $Invoice = new Invoice();
+    $Invoice->status = 'pending';
+    $Invoice->offer_price = $req->offer_price;
+    $Invoice->student_id = $req->student_id;
+    $Invoice->cource_id = $req->cource_id;
+    $Invoice->teacher_id = $user->id;        
+    $Invoice->user_id = $user->id;        
+    $Invoice->save();
+    // The rest of your code...
     $offer = new Offer(); // Renamed the variable to $offer
     $offer->status = $req->status;
     $offer->offer_price = $req->offer_price;
-    $offer->student_id =  $user->id;
-    $offer->teacher_id = $req->teacher_id;
+    $offer->student_id = $req->student_id;
+    $offer->teacher_id = $user->id;
     $offer->description = $req->description;
-    $offer->strip_key = $intent->client_secret;
+    $offer->strip_key = $intent->id;
     $offer->cource_id = $req->cource_id;
-
+    $offer->invoice_id = $Invoice->id;
     // Retrieve the course object based on the provided cource_id
     $course = Cource::find($req->cource_id);
     if (!$course) {
@@ -192,7 +111,7 @@ class OfferController extends Controller
 
     // Create a chat message
     $message = $req->input('message');
-    $recipient = $req->input('teacher_id');
+    $recipient = $req->input('student_id');
     $type = $req->input('type');
     $chatMessage = ChatMessage::create([
         'user_id' => $user->id,
@@ -232,8 +151,10 @@ class OfferController extends Controller
         'message' => 'Add Offer created successfully',
         'data' => $offer,
         'chat' => $chatMessage,
+        'nvoice'=> $Invoice
     ], 200);
 }
+  
     
 
     public function show($id)
@@ -243,7 +164,7 @@ class OfferController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'data not found'
-            ], 404);
+            ], 404); 
         }
         return response()->json([
             'success' => true,
@@ -380,14 +301,8 @@ class OfferController extends Controller
         if ($validator->fails()) {
             return response()->json($validator->errors());         
         }
-        $Offer = Offer::find($id);
-        $Offer->status = 'Paid';      
-        $Offer->save();
-        $user = $req->user();
-        $Invoice = new Invoice();
-        $Invoice->offer_price = $Offer->offer_price;
-        $Invoice->student_id = $user->id;
-        $Invoice->teacher_id = $Offer->teacher_id;        
+        $Invoice = Invoice::with('teacher','student','cource')->where('id',$id)->first();
+        $Invoice->status = $req->status;     
         $Invoice->save();
         return response()->json([
             'success' => true,
@@ -397,9 +312,69 @@ class OfferController extends Controller
     }
 
 
+    // public function invoice(Request $req, $id)
+    // {
+    //     $validator = Validator::make($req->all(), [
+    //         // 'name' => 'required|string|max:255',
+    //     ]);
+
+    //     if ($validator->fails()) {
+    //         return response()->json($validator->errors());
+    //     }
+
+    //     $invoice = Invoice::with('teacher', 'student', 'cource.class')->where('id', $id)->first();
+    //     if (!$invoice) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Invoice not found'
+    //         ], 404);
+    //     }
+
+    //     // Retrieve the Payment Intent using the provided client_secret
+    //     \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
+    //     $paymentIntent = \Stripe\PaymentIntent::retrieve($req->client_secret);
+    //     if ($paymentIntent->status === 'succeeded') {
+    //         // Payment succeeded, update the invoice status
+    //     $invoice->status = $req->status;     
+    //    $invoice->save();
+
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Payment Successful',
+    //             'data' => $invoice
+    //         ], 200);
+    //     } else {
+    //         // Payment incomplete or failed, show a message
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Payment Incomplete'
+    //         ], 400);
+    //     }
+    // }
+
+
+
+    public function invoiceOne($id)
+    {
+        $Invoice = Invoice::with('teacher','student','cource.class')->where('id', $id)->first();
+        if (is_null($Invoice)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'data not found'
+            ], 404);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => 'All Data susccessfull',
+            'data' => $Invoice,
+        ],200);
+    } 
+
+
+
     public function invoiceGet(Request $request)
     {
-        $results = Invoice::with('teacher','student')->get();
+        $results = Invoice::with('teacher','student','cource.class')->get();
         if (is_null($results)) {
             return response()->json([
                 'success' => false,
@@ -414,9 +389,28 @@ class OfferController extends Controller
     }
 
 
-    public function invoiceShow($id)
+    public function invoiceShow(Request $request)
     {
-        $Invoice = Invoice::with('teacher','student')->where('id', $id)->first();
+        $user = $request->user();
+        $Invoice = Invoice::with('teacher','student','cource')->where('student_id', $user->id)->orWhere('teacher_id', $user->id)->get();
+        if (is_null($Invoice)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'data not found'
+            ], 404);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => 'All Data susccessfull',
+            'data' => $Invoice,
+        ],200);
+    }
+    
+    
+    
+    public function invoiceShowAdmin(Request $request)
+    {
+        $Invoice = Invoice::with('teacher','student','cource.class')->get();
         if (is_null($Invoice)) {
             return response()->json([
                 'success' => false,
@@ -429,6 +423,74 @@ class OfferController extends Controller
             'data' => $Invoice,
         ],200);
     } 
+
+
+    public function invoiceShowAdminId(Request $request, $id)
+    {
+        $Invoice = Invoice::with('teacher','student','cource.class')->where('id',$id)->first();
+        if (is_null($Invoice)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'data not found'
+            ], 404);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => 'All Data susccessfull',
+            'data' => $Invoice,
+        ],200);
+    } 
+
+
+
+
+    public function notificationOffer(Request $request)
+    {
+        $user = $request->user();
+    
+        // Retrieve the IDs of users who have sent messages to or received messages from the current user
+        $chattedUserIds = ChatMessage::where('user_id', $user->id)
+        ->orWhere('sender_id', $user->id)
+        ->pluck('user_id')
+        ->concat(ChatMessage::where('user_id', $user->id)
+            ->orWhere('sender_id', $user->id)
+            ->pluck('sender_id'))
+        ->unique();
+    
+        // Retrieve the offers related to the user (as a student or teacher)
+        $invoices = Offer::with('teacher', 'student', 'cource.class', 'invoice')
+            ->where('student_id', $user->id)
+            ->orWhere('teacher_id', $user->id)
+            ->get();
+    
+        if ($invoices->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data not found'
+            ], 404);
+        }
+    
+        // Calculate unseen_message_count for each user
+        $unseen_message_count = ChatMessage::whereIn('user_id', $chattedUserIds)
+        ->where('sender_id', $user->id)
+        ->where('seen', false)
+        // dd( $unseen_message_count);
+        ->count();
+    
+        return response()->json([
+            'success' => true,
+            'message' => 'All Data retrieved successfully',
+            'data' => $invoices,
+            'unseen_message_count' => $unseen_message_count, // Add the users data with unseen_message_count to the response
+        ], 200);
+    }
+    
+
+
+
+
+
+
         
 
 }

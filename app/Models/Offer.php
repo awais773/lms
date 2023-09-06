@@ -21,13 +21,23 @@ class Offer extends Model
 
 
     public function cource() {
-        return $this->hasOne(User::class, 'id', 'cource_id');  
+        return $this->hasOne(Cource::class, 'id', 'cource_id');  
     }
 
 
     public function courses()
     {
         return $this->belongsTo(Cource::class, 'cource_id');
+    }
+    
+
+    public function invoice() {
+        return $this->hasOne(Invoice::class, 'id', 'invoice_id');  
+    }
+
+
+    public function class() {
+        return $this->hasOne(Category::class, 'id', 'class_id');  
     }
 
 

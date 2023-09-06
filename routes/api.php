@@ -31,6 +31,15 @@ Route::post('adminRegister',[App\Http\Controllers\api\AdminAuthController::class
 Route::delete('deleteUsers',[App\Http\Controllers\api\AdminAuthController::class,'deleteUser']);
 Route::post('adminlogin',[App\Http\Controllers\api\AdminAuthController::class,'adminlogin']);
 Route::get('dashboard',[App\Http\Controllers\api\AdminAuthController::class,'dashboard']);
+Route::get('/invoiceShowAdmin', [App\Http\Controllers\api\OfferController::class, 'invoiceShowAdmin']);
+Route::get('/invoiceShowAdminId/{id}', [App\Http\Controllers\api\OfferController::class, 'invoiceShowAdminId']);
+
+Route::get('ReviewGet',[App\Http\Controllers\api\AdminAuthController::class,'ReviewGet']);
+Route::get('ReviewGet/{id}',[App\Http\Controllers\api\AdminAuthController::class,'ReviewshowId']);
+Route::get('ReviewStatus',[App\Http\Controllers\api\AdminAuthController::class,'ReviewStatus']);
+Route::delete('reviewDestroy/{id}',[App\Http\Controllers\api\AdminAuthController::class,'ReviewStatus']);
+Route::post('reviewUpdate/{id}',[App\Http\Controllers\api\AdminAuthController::class,'reviewUpdate']);
+
 
       // testimonial
 Route::post('Addtestimonial',[App\Http\Controllers\api\AdminAuthController::class,'Addtestimonial']);
@@ -91,7 +100,7 @@ Route::get('/offerGet/{id}', [App\Http\Controllers\api\OfferController::class, '
 
 Route::post('/offerStatus/{id}', [App\Http\Controllers\api\OfferController::class, 'invoice']);
 Route::get('/invoice', [App\Http\Controllers\api\OfferController::class, 'invoiceGet']);
-Route::get('/invoice/{id}', [App\Http\Controllers\api\OfferController::class, 'invoiceShow']);
+// Route::get('/invoice/{id}', [App\Http\Controllers\api\OfferController::class, 'invoiceShow']);
 
     ///  contact
 Route::apiResource('contacts', App\Http\Controllers\api\ContactController::class);
@@ -114,9 +123,9 @@ Route::get('/getTeacher',[App\Http\Controllers\api\AuthController::class,'getTea
 Route::get('/dependencies', [App\Http\Controllers\api\SubjectController::class, 'dependencies']);
 
        //     
-Route::delete('reviewDestroy/{id}',[App\Http\Controllers\api\AdminAuthController::class,'reviewDestroy']);
 Route::post('reviewAdd',[App\Http\Controllers\api\AdminAuthController::class,'reviewAdd']);
-Route::get('ReviewGet',[App\Http\Controllers\api\AdminAuthController::class,'ReviewGet']);
+Route::get('ReviewGetTeacher',[App\Http\Controllers\api\AdminAuthController::class,'ReviewGetTeacherAll']);
+Route::get('ReviewGetTeacher/{id}',[App\Http\Controllers\api\AdminAuthController::class,'ReviewGetTeacher']);
 
 
 Route::apiResource('packages', App\Http\Controllers\api\PackageController::class);
@@ -155,7 +164,9 @@ Route::post('stripePost', [App\Http\Controllers\api\PaymentController::class, 's
 
 Route::post('/offerStatus/{id}', [App\Http\Controllers\api\OfferController::class, 'invoice']);
 Route::get('/invoice', [App\Http\Controllers\api\OfferController::class, 'invoiceGet']);
-Route::get('/invoice/{id}', [App\Http\Controllers\api\OfferController::class, 'invoiceShow']);
+Route::get('/invoice/{id}', [App\Http\Controllers\api\OfferController::class, 'invoice']);
+Route::get('/invoiceShow', [App\Http\Controllers\api\OfferController::class, 'invoiceShow']);
+Route::get('/notificationOffer', [App\Http\Controllers\api\OfferController::class, 'notificationOffer']);
 
 
 
